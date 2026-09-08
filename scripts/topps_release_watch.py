@@ -5,7 +5,7 @@ import json, re, requests
 from bs4 import BeautifulSoup
 
 ROOT=Path(__file__).resolve().parents[1]
-URL="https://www.topps.com/release-calendar"
+SOURCES=ROOT/"data/sources.json"
 WATCHLIST=ROOT/"data/watchlist.json"
 MONTHS="Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
 DATE_RE=re.compile(r"\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)?[,]?\s*(?:"+MONTHS+r")\s+\d{1,2}(?:[,]?\s+\d{4})?",re.I)
@@ -35,11 +35,11 @@ def product_name(anchor_text):
     value=re.sub(r"\b(?:19|20)\d{2}\b\s*(?:at\s+\d{1,2}:\d{2}\s*(?:AM|PM)\s*UTC)?","",value,flags=re.I)
     value=re.sub(r"^Image:\s*","",value,flags=re.I)
     value=clean(value)
-    if len(value)<8 or not re.search(r"\b(?:Topps|Bowman)\b",value,re.I):
+    if len(value)<8 or value.lower() in {"release calendar","available now","dropping soon"}:
         return None
     return value
 
-def parse_releases(html, year):
+def parse_releases(html, year, manufacturer):
     soup=BeautifulSoup(html,"html.parser")
     releases=[]
     seen=set()
@@ -51,50 +51,74 @@ def parse_releases(html, year):
         release_date=parse_date(block,year)
         if not name or not release_date:
             continue
-        key=(name.casefold(),release_date.isoformat())
+        key=(manufacturer.casefold(),name.casefold(),release_date.isoformat())
         if key in seen:
             continue
         seen.add(key)
+        slug=re.sub(r"[^a-z0-9]+","-",(manufacturer+"-"+name).lower()).strip("-")
         releases.append({
-            "id":"topps-"+re.sub(r"[^a-z0-9]+","-",name.lower()).strip("-")+"-"+release_date.isoformat(),
-            "manufacturer":"Topps",
+            "id":slug+"-"+release_date.isoformat(),
+            "manufacturer":manufacturer,
             "product":name,
             "releaseDate":release_date.isoformat(),
             "tentativeDeadline":(release_date+timedelta(days=45)).isoformat(),
-            "status":"VERIFY_NPN",
-            "source":URL
+            "status":"VERIFY_NPN"
         })
     return releases
 
 now=datetime.now(timezone.utc)
-response=requests.get(URL,headers={"User-Agent":"Mozilla/5.0 NPNCommandCenter"},timeout=25)
-response.raise_for_status()
-releases=parse_releases(response.text,now.year)
-if not releases:
-    raise RuntimeError("Topps release calendar returned no parseable products; existing watchlist was not changed")
-
+source_items=json.loads(SOURCES.read_text()).get("items",[])
+calendars=[item for item in source_items if item.get("type","").lower()=="release_calendar"]
 data=json.loads(WATCHLIST.read_text())
 existing=data.get("items",[])
-manual=[item for item in existing if item.get("source")!=URL]
-old_calendar={item.get("product","").casefold():item for item in existing if item.get("source")==URL}
+calendar_urls={item.get("url") for item in calendars}
+manual=[item for item in existing if item.get("source") not in calendar_urls]
+old_by_source={}
+for item in existing:
+    if item.get("source") in calendar_urls:
+        old_by_source.setdefault(item.get("source"),{})[item.get("product","").casefold()]=item
+
 synced=[]
+checks=[]
 added=0
 updated=0
-for release in releases:
-    previous=old_calendar.get(release["product"].casefold())
-    if previous:
-        release["status"]=previous.get("status",release["status"])
-        release["id"]=previous.get("id",release["id"])
-        updated+=1
-    else:
-        added+=1
-    synced.append(release)
+removed=0
+successful=0
+for source in calendars:
+    url=source["url"]
+    manufacturer=source.get("manufacturer",source.get("name","Unknown"))
+    try:
+        response=requests.get(url,headers={"User-Agent":"Mozilla/5.0 NPNCommandCenter"},timeout=25)
+        response.raise_for_status()
+        releases=parse_releases(response.text,now.year,manufacturer)
+        if not releases:
+            raise RuntimeError("calendar returned no parseable products")
+        successful+=1
+        old=old_by_source.get(url,{})
+        current=[]
+        for release in releases:
+            previous=old.get(release["product"].casefold())
+            release["source"]=url
+            if previous:
+                release["status"]=previous.get("status",release["status"])
+                release["id"]=previous.get("id",release["id"])
+                updated+=1
+            else:
+                added+=1
+            current.append(release)
+        removed+=len(old)-sum(1 for release in releases if release["product"].casefold() in old)
+        synced.extend(current)
+        checks.append({"name":source.get("name"),"url":url,"status":"OK","products":len(releases)})
+    except Exception as error:
+        synced.extend(item for item in existing if item.get("source")==url)
+        checks.append({"name":source.get("name"),"url":url,"status":"ERROR","error":str(error)})
 
-removed=len(old_calendar)-sum(1 for release in releases if release["product"].casefold() in old_calendar)
 data["items"]=manual+synced
-data["generated"]=now.date().isoformat()
 data["lastCalendarCheck"]=now.isoformat()
-data["calendarSource"]=URL
-data["syncSummary"]={"added":added,"updated":updated,"removed":removed,"calendarProducts":len(releases)}
+data["calendarChecks"]=checks
+data["calendarSource"]=[source["url"] for source in calendars]
+data["syncSummary"]={"added":added,"updated":updated,"removed":removed,"successfulCalendars":successful,"calendarCount":len(calendars)}
 WATCHLIST.write_text(json.dumps(data,indent=2)+"\n")
-print(json.dumps({"calendarProducts":len(releases),"added":added,"updated":updated,"removed":removed},indent=2))
+print(json.dumps(data["syncSummary"]|{"checks":checks},indent=2))
+if calendars and successful==0:
+    raise SystemExit(1)
