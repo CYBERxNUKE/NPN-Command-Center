@@ -46,6 +46,22 @@
       const result = await state.client.from('review_queue').insert({ submitted_by: state.user.id, source_url: url, raw_payload: { title: title || '', intake: 'share_sheet' } });
       if (result.error) throw result.error;
       return result.data;
+    },
+    syncSubmission: async function (opportunity, status) {
+      if (!state.client || !state.user) return;
+      const result = await state.client.rpc('record_submission', {
+        p_external_key: opportunity.id,
+        p_manufacturer: opportunity.manufacturer || '',
+        p_product: opportunity.product || '',
+        p_source_url: opportunity.source || '',
+        p_status: status,
+        p_mailed_at: status === 'MAILED' ? new Date().toISOString().slice(0, 10) : null,
+        p_postmark_deadline: /^\\d{4}-\\d{2}-\\d{2}$/.test(opportunity.postmarkDeadline || '') ? opportunity.postmarkDeadline : null,
+        p_address: opportunity.address || null,
+        p_instructions: opportunity.instructions || null
+      });
+      if (result.error) throw result.error;
+      return result.data;
     }
   };
 

@@ -9,6 +9,8 @@ The migration in `migrations/001_production_foundation.sql` is the backend found
 3. Enable the authentication providers required by the application.
 4. Keep the service-role key server-side only. It must never be placed in `index.html`.
 
+The second migration adds the `record_submission` RPC. When an authenticated user marks an opportunity mailed, the client uses this RPC to create or update a private submission record and a default household/member. It is safe to call repeatedly for the same user and opportunity.
+
 ## Runtime configuration
 
 The eventual authenticated application needs:

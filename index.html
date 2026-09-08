@@ -81,7 +81,7 @@ function updateStats(){
   updateStats();
   renderSourceHealth();
 }
-function toggle(id){let m=mailed();m[id]=!m[id];localStorage.setItem('npn-mailed-v2',JSON.stringify(m));render()}
+function toggle(id){let m=mailed(),next=!m[id],item=DB.opps.find(x=>x.id===id);m[id]=next;localStorage.setItem('npn-mailed-v2',JSON.stringify(m));render();if(window.npnAuth&&window.npnAuth.syncSubmission&&item)window.npnAuth.syncSubmission(item,next?'MAILED':'PLANNED').catch(error=>console.error('Cloud submission sync failed',error))}
 function openPacket(id){let x=DB.opps.find(y=>y.id===id);sheet.innerHTML=`<button class="close" onclick="closeModal()">Close</button><h2>${esc(x.product)}</h2><p><b>${esc(x.manufacturer)} — ${esc(x.category)}</b></p><div class="kv"><div class="k">Postmark by</div><div>${esc(x.postmarkDeadline)}</div><div class="k">Received by</div><div>${esc(x.receivedDeadline||'—')}</div><div class="k">Entry limit</div><div>${esc(x.entryLimit)}</div><div class="k">Mail to</div><div>${esc(x.address||'See official rules')}</div><div class="k">Attention</div><div>${esc(x.attention||'—')}</div></div><h3>What to do</h3><p>${esc(x.instructions)}</p><h3>Prize / pool</h3><p>${esc(x.prize)}</p><p><b>Official source:</b><br><a href="${esc(x.source)}">${esc(x.source)}</a></p><p><b>Rule:</b> If this packet conflicts with the sponsor's live rules, the sponsor's live rules win.</p><button class="printbtn" onclick="window.print()">Print</button>`;modal.classList.add('on')}
 function closeModal(){modal.classList.remove('on')}
 function printOpen(){state.value='OPEN';render();setTimeout(()=>window.print(),100)}
