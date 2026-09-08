@@ -15,16 +15,18 @@
 
 | Requested feature | Backend location | Remaining runtime work |
 | --- | --- | --- |
-| Multi-device history | `submissions` | Connect the authenticated UI |
-| Authentication | Supabase Auth and `profiles` | Add login and invite screens |
-| Email, SMS, push | `notification_preferences`, `notification_jobs` | Add provider workers and web push registration |
-| Package evidence | `submission_evidence` and `submission-evidence` bucket | Add image upload and signed URL viewer |
-| Checklist and odds | `opportunities.checklist_url`, `opportunities.odds_url` | Add admin editing and validation |
+| Multi-device history | `submissions` and `record_submission` | Apply migrations and configure Supabase |
+| Authentication | Supabase Auth and `profiles` | Configure providers and redirect URLs |
+| Email, SMS, push | `notification_preferences`, `notification_jobs` | Deploy worker, provider credentials, and scheduler |
+| Package evidence | `submission_evidence` and `submission-evidence` bucket | Add signed evidence viewer |
+| Checklist and odds | `opportunities.checklist_url`, `opportunities.odds_url` | Add admin editing and validation UI |
 | Prize intelligence | `opportunity_prizes` | Add review and source citation UI |
 | Household limits | `household_members.limits` | Add rule evaluation before submission creation |
-| USPS manifests | `postage_batches` and `postage_batch_items` | Add USPS API worker and address validation |
-| Admin review | `review_queue` | Add protected reviewer role and queue UI |
-| Extension/share sheet | `review_queue` | Add browser extension and authenticated intake endpoint |
+| USPS manifests | `postage_batches` and `postage_batch_items` | Configure USPS endpoint and address validation |
+| Admin review | `review_queue` | Apply migrations and configure admin role |
+| Extension/share sheet | `review_queue` | Load extension and configure Supabase |
+
+The repository now includes the authenticated account, admin, postage, and manifest pages; the browser extension; the notification and USPS Edge Function sources; and the JSON-to-Supabase sync worker. External provider credentials and a Supabase project are still required for live execution.
 
 ## Safety requirements before launch
 
