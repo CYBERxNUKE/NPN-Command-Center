@@ -89,6 +89,18 @@
       if (upload.error) throw upload.error;
       const result = await state.client.from('submission_evidence').insert({ submission_id: submissionId, owner_id: state.user.id, storage_path: path, file_name: file.name, mime_type: file.type, caption: caption || null });
       if (result.error) throw result.error;
+    },
+    listEvidence: async function (opportunity) {
+      if (!state.client || !state.user) throw new Error('Sign in before viewing evidence.');
+      const submissionId = await this.syncSubmission(opportunity, 'PREPARED');
+      const result = await state.client.from('submission_evidence').select('file_name,storage_path,caption,created_at').eq('submission_id', submissionId).order('created_at', { ascending: false });
+      if (result.error) throw result.error;
+      const items = [];
+      for (const item of result.data || []) {
+        const signed = await state.client.storage.from('submission-evidence').createSignedUrl(item.storage_path, 900);
+        if (!signed.error) items.push({ ...item, url: signed.data.signedUrl });
+      }
+      return items;
     }
   };
 
