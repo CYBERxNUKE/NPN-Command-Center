@@ -126,7 +126,7 @@ as $$
     select id
     from public.notification_jobs
     where (status = 'queued' and available_at <= now())
-       or (status = 'processing' and locked_at < now() - interval '15 minutes')
+       or (status = 'processing' and (locked_at is null or locked_at < now() - interval '15 minutes'))
     order by created_at
     for update skip locked
     limit greatest(1, least(coalesce(p_limit, 25), 100))
