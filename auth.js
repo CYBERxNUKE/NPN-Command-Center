@@ -95,7 +95,10 @@
       const upload = await state.client.storage.from('submission-evidence').upload(path, file, { contentType: file.type, upsert: false });
       if (upload.error) throw upload.error;
       const result = await state.client.from('submission_evidence').insert({ submission_id: submissionId, owner_id: state.user.id, storage_path: path, file_name: file.name, mime_type: file.type, caption: caption || null });
-      if (result.error) throw result.error;
+      if (result.error) {
+        await state.client.storage.from('submission-evidence').remove([path]);
+        throw result.error;
+      }
     },
     listEvidence: async function (opportunity) {
       if (!state.client || !state.user) throw new Error('Sign in before viewing evidence.');
