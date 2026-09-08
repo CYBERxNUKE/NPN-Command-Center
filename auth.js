@@ -22,7 +22,10 @@
       };
       return;
     }
-    panel.innerHTML = '<b>Signed in</b><div style="color:#91a3ba;margin-top:4px">' + state.user.email + '</div><button id="npnSignOut" style="margin-top:7px;padding:5px">Sign out</button>';
+    panel.innerHTML = '<b>Signed in</b><div style="color:#91a3ba;margin-top:4px">' + state.user.email + '</div><button id="npnPush" style="margin-top:7px;padding:5px">Enable push</button><button id="npnSignOut" style="margin:7px 0 0 5px;padding:5px">Sign out</button>';
+    document.getElementById('npnPush').onclick = async function () {
+      try { await window.npnAuth.enablePush(); render('Push notifications enabled.'); } catch (error) { render(error.message); }
+    };
     document.getElementById('npnSignOut').onclick = function () { state.client.auth.signOut(); };
   }
 
@@ -62,6 +65,19 @@
       });
       if (result.error) throw result.error;
       return result.data;
+    },
+    enablePush: async function () {
+      if (!state.client || !state.user) throw new Error('Sign in before enabling push.');
+      if (!config.vapidPublicKey || config.vapidPublicKey.includes('YOUR_')) throw new Error('VAPID public key is not configured.');
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) throw new Error('Push notifications are not supported here.');
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') throw new Error('Notification permission was not granted.');
+      const registration = await navigator.serviceWorker.ready;
+      const key = Uint8Array.from(atob(config.vapidPublicKey.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+      const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+      const json = subscription.toJSON();
+      const result = await state.client.from('push_subscriptions').upsert({ owner_id: state.user.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth_key: json.keys.auth }, { onConflict: 'owner_id,endpoint' });
+      if (result.error) throw result.error;
     }
   };
 

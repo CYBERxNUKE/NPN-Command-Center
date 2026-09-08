@@ -19,7 +19,9 @@ The eventual authenticated application needs:
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` only in a trusted worker
 - `RESEND_API_KEY` or another email provider
+- `RESEND_FROM` for the verified sender identity
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER` for SMS
 - `USPS_CLIENT_ID` and `USPS_CLIENT_SECRET` for live postage rates
+- `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, and `VAPID_PRIVATE_KEY` for Web Push
 
 GitHub Pages can continue serving the public read-only dashboard. Authenticated writes and workers should run through Supabase Edge Functions or another server-side runtime.
