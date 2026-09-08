@@ -2,6 +2,7 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import json, os, re, requests
+from urllib.parse import quote
 
 ROOT=Path(__file__).resolve().parents[1]
 URL=os.environ.get('SUPABASE_URL','').rstrip('/')
@@ -31,6 +32,27 @@ def sync(rows):
     response=requests.post(URL+'/rest/v1/opportunities?on_conflict=external_key',headers=headers,json=rows,timeout=30)
     response.raise_for_status()
 
+def reconcile(rows):
+    if not rows:
+        return 0
+    current={row.get('external_key') for row in rows if row.get('external_key')}
+    response=requests.get(URL+'/rest/v1/opportunities?select=id,external_key,status,source_kind,created_by&external_key=not.is.null',headers=headers,timeout=30)
+    response.raise_for_status()
+    stale=[]
+    for item in response.json():
+        if item.get('external_key') in current or item.get('created_by'):
+            continue
+        if item.get('source_kind') not in {'official','secondary'}:
+            continue
+        if item.get('status') not in {'OPEN','PROGRAM','RADAR','VERIFY_NPN'}:
+            continue
+        stale.append(item)
+    for item in stale:
+        endpoint=URL+'/rest/v1/opportunities?external_key=eq.'+quote(str(item['external_key']),safe='')
+        result=requests.patch(endpoint,headers=headers,json={'status':'CLOSED','review_notes':'No longer present in the latest public data snapshot.'},timeout=30)
+        result.raise_for_status()
+    return len(stale)
+
 opportunities=json.loads((ROOT/'data/opportunities.json').read_text()).get('items',[])
 watchlist=json.loads((ROOT/'data/watchlist.json').read_text()).get('items',[])
 rows=[]
@@ -53,4 +75,4 @@ for item in watchlist:
         'source_kind':source_kind.get(item.get('source'),'secondary'), 'source_last_checked_at':datetime.now(timezone.utc).isoformat()
     })
 sync(rows)
-print(json.dumps({'synced':len(rows)},indent=2))
+print(json.dumps({'synced':len(rows),'closed_stale':reconcile(rows)},indent=2))

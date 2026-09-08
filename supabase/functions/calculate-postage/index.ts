@@ -18,7 +18,20 @@ async function token() {
 
 Deno.serve(async (request) => {
   if (!pricesUrl) return Response.json({ error: 'USPS_PRICES_URL is not configured' }, { status: 503 });
-  const body = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: 'Request body must be valid JSON' }, { status: 400 });
+  }
+  const zip = (value: unknown) => /^\d{5}$/.test(String(value || ''));
+  if (!zip(body.originZIPCode) || !zip(body.destinationZIPCode)) {
+    return Response.json({ error: 'Origin and destination ZIP codes must be five digits' }, { status: 400 });
+  }
+  const weight = Number(body.weight);
+  if (!Number.isFinite(weight) || weight <= 0 || weight > 70) {
+    return Response.json({ error: 'Weight must be greater than zero and no more than 70 ounces' }, { status: 400 });
+  }
   const accessToken = await token();
   const response = await fetch(pricesUrl, {
     method: 'POST',
@@ -26,7 +39,7 @@ Deno.serve(async (request) => {
     body: JSON.stringify({
       originZIPCode: body.originZIPCode,
       destinationZIPCode: body.destinationZIPCode,
-      weight: body.weight,
+      weight,
       length: body.length || 10,
       width: body.width || 6,
       height: body.height || 1,
