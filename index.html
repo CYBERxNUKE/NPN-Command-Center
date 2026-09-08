@@ -79,7 +79,29 @@ function openPacket(id){let x=DB.opps.find(y=>y.id===id);sheet.innerHTML=`<butto
 function closeModal(){modal.classList.remove('on')}
 function printOpen(){state.value='OPEN';render();setTimeout(()=>window.print(),100)}
 function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadline','receivedDeadline','entryLimit','method','address','attention','source'];let rows=[cols,...DB.opps.map(x=>cols.map(k=>x[k]||''))];let csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='npn-command-center.csv';a.click()}
-Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json())]).then(([o,w,s])=>{DB={opps:o.items,watch:w.items,sources:s.items};snapshot.textContent=o.generated;[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
+ async function updateEngineStatus(){
+  const badge=document.querySelector('.pulse');
+  let detail=document.getElementById('engineDetail');
+  if(!detail){detail=document.createElement('div');detail.id='engineDetail';detail.style.marginTop='10px';badge.parentNode.insertBefore(detail,snapshot.parentNode)}
+  try{
+   const runResponse=await fetch('https://api.github.com/repos/CYBERxNUKE/NPN-Command-Center/actions/workflows/investigate.yml/runs?per_page=1',{cache:'no-store'});
+   if(!runResponse.ok)throw new Error('status unavailable');
+   const runs=(await runResponse.json()).workflow_runs||[], run=runs[0];
+   const updating=run&&(run.status==='queued'||run.status==='in_progress');
+   badge.innerHTML='<span class="dot"></span> '+(updating?'WATCH ENGINE UPDATING':'WATCH ENGINE READY');
+   badge.className='pulse';
+   if(updating){badge.style.borderColor='#66521d';badge.style.background='#2a210c';badge.style.color='#ffd166'}
+   else{badge.style.borderColor='';badge.style.background='';badge.style.color=''}
+   detail.textContent=run?'Last investigator run: '+new Date(run.updated_at).toLocaleString():'No investigator run yet';
+  }catch(error){
+   badge.innerHTML='<span class="dot"></span> WATCH ENGINE STATUS UNKNOWN';
+   badge.style.borderColor='#64262c';badge.style.background='#351417';badge.style.color='#ff9ca4';
+   detail.textContent='Could not reach investigator status';
+  }
+ }
+ Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json())]).then(([o,w,s])=>{DB={opps:o.items,watch:w.items,sources:s.items};snapshot.textContent=o.generated;[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
+ updateEngineStatus();
+ setInterval(updateEngineStatus,60000);
 q.oninput=render;maker.onchange=render;state.onchange=render;
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
