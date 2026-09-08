@@ -82,5 +82,24 @@
       "status": "VERIFY_NPN",
       "source": "https://www.topps.com/release-calendar"
     }
-  ]
+  ],
+  "lastCalendarCheck": "2026-09-08T01:20:57.282150+00:00",
+  "calendarChecks": [
+    {
+      "name": "Topps Release Calendar",
+      "url": "https://www.topps.com/release-calendar",
+      "status": "ERROR",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
+    }
+  ],
+  "calendarSource": [
+    "https://www.topps.com/release-calendar"
+  ],
+  "syncSummary": {
+    "added": 0,
+    "updated": 0,
+    "removed": 0,
+    "successfulCalendars": 0,
+    "calendarCount": 1
+  }
 }
