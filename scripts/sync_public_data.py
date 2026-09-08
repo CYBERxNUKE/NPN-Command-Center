@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json, os, re, requests
 from urllib.parse import quote
 
@@ -90,5 +90,44 @@ def sync_review_leads(leads):
     response=requests.post(URL+'/rest/v1/review_queue',headers=lead_headers,json=payload,timeout=30)
     response.raise_for_status()
 
+def sync_source_change_notifications():
+    log_path=ROOT/'data/discovery-log.json'
+    if not log_path.exists():
+        return 0
+    cutoff=datetime.now(timezone.utc)-timedelta(hours=24)
+    events=[]
+    for event in json.loads(log_path.read_text()).get('events',[]):
+        if event.get('type')!='SOURCE_CHANGED' or not event.get('url'):
+            continue
+        try:
+            event_time=datetime.fromisoformat(str(event.get('time','')).replace('Z','+00:00'))
+        except ValueError:
+            continue
+        if event_time >= cutoff:
+            events.append(event)
+    if not events:
+        return 0
+    preferences=requests.get(URL+'/rest/v1/notification_preferences?select=owner_id,channel,event_types&enabled=eq.true',headers=headers,timeout=30)
+    preferences.raise_for_status()
+    jobs=[]
+    for preference in preferences.json():
+        if 'source_changed' not in (preference.get('event_types') or []):
+            continue
+        for event in events:
+            dedupe='source:'+str(preference['owner_id'])+':'+str(preference['channel'])+':'+event['url']+':'+str(event.get('time'))
+            jobs.append({
+                'owner_id':preference['owner_id'],
+                'channel':preference['channel'],
+                'event_type':'source_changed',
+                'dedupe_key':dedupe,
+                'payload':{'subject':'NPN source changed: '+str(event.get('source','')), 'message':'An official source changed and needs review: '+event['url'], 'url':event['url']}
+            })
+    if not jobs:
+        return 0
+    job_headers={**headers,'Prefer':'resolution=ignore-duplicates,return=minimal'}
+    response=requests.post(URL+'/rest/v1/notification_jobs',headers=job_headers,json=jobs,timeout=30)
+    response.raise_for_status()
+    return len(jobs)
+
 sync_review_leads(review_leads)
-print(json.dumps({'synced':len(rows),'review_leads':len(review_leads),'closed_stale':reconcile(rows)},indent=2))
+print(json.dumps({'synced':len(rows),'review_leads':len(review_leads),'notification_jobs':sync_source_change_notifications(),'closed_stale':reconcile(rows)},indent=2))
