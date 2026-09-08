@@ -19,6 +19,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - name: Check official sources
+        continue-on-error: true
         run: python scripts/watch.py
       - name: Scan all release calendars
         continue-on-error: true
@@ -51,3 +52,21 @@ jobs:
             if(!fresh.length) return;
             const body=fresh.map(x=>`- **${x.source}** changed: ${x.url}\n  Signals: ${(x.signals||[]).join(', ')}`).join('\n');
             await github.rest.issues.create({owner:context.repo.owner,repo:context.repo.repo,title:`🚨 NPN source change detected (${fresh.length})`,body:`The investigator found official-source changes that need review.\n\n${body}\n\nDo not assume a changed page means a new eligible offer; verify the official rules before mailing.`});
+      - name: Create alert issue when sources fail
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const status = JSON.parse(fs.readFileSync('data/engine-status.json','utf8'));
+            const watchlist = JSON.parse(fs.readFileSync('data/watchlist.json','utf8'));
+            const errors=(status.results||[]).filter(x=>x.status==='ERROR');
+            const calendarErrors=(watchlist.calendarChecks||[]).filter(x=>x.status==='ERROR');
+            if(!errors.length && !calendarErrors.length) return;
+            const lines=errors.map(x=>`- ${x.name}: ${x.url} (${x.error})`).concat(calendarErrors.map(x=>`- ${x.name}: ${x.url} (${x.error})`));
+            const open=await github.paginate(github.rest.issues.listForRepo,{owner:context.repo.owner,repo:context.repo.repo,state:'open',per_page:100});
+            if(open.some(issue=>issue.title.startsWith('NPN source checks failed'))) return;
+            await github.rest.issues.create({owner:context.repo.owner,repo:context.repo.repo,title:`NPN source checks failed (${lines.length})`,body:`The investigator could not verify these sources:\n\n${lines.join('\n')}\n\nRetry after the source becomes available.`});
+      - name: Fail when source checks have errors
+        if: always()
+        run: |
+          python -c "import json; s=json.load(open('data/engine-status.json')); w=json.load(open('data/watchlist.json')); errors=[x for x in s.get('results',[]) if x.get('status')=='ERROR']+[x for x in w.get('calendarChecks',[]) if x.get('status')=='ERROR']; print(json.dumps({'errors':len(errors)})); raise SystemExit(1 if errors else 0)"
