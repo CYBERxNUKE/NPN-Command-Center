@@ -34,6 +34,13 @@
       "url": "https://www.paniniamerica.net/customer-support-faq",
       "type": "official_support",
       "priority": 2
+    },
+    {
+      "name": "NPN Offers aggregator",
+      "manufacturer": "Multiple",
+      "url": "https://npnoffers.com/",
+      "type": "secondary_aggregator",
+      "priority": 2
     }
   ]
 }
