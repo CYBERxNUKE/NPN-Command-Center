@@ -7,7 +7,7 @@
 - Multi-device submission records.
 - Private evidence storage bucket policies.
 - Product checklist, odds, prize, and card-pool fields.
-- Review queue for secondary-source and share-sheet leads.
+- Review queue for secondary-source scraper and share-sheet leads.
 - Notification preferences and durable notification jobs.
 - Postage batch and manifest records.
 
@@ -23,7 +23,7 @@
 | Prize intelligence | `opportunity_prizes` | Add review and source citation UI |
 | Household limits | `households.limits`, `household_members.limits` | Configure limits per household and member |
 | USPS manifests | `postage_batches` and `postage_batch_items` | Configure USPS endpoint and address validation |
-| Admin review | `review_queue` | Apply migrations and configure admin role |
+| Admin review | `review_queue` and `scripts/collect_review_leads.py` | Apply migrations and configure admin role |
 | Extension/share sheet | `review_queue` | Load extension and configure Supabase |
 
 The repository now includes the authenticated account, admin, postage, and manifest pages; the browser extension; the notification and USPS Edge Function sources; and the JSON-to-Supabase sync worker. External provider credentials and a Supabase project are still required for live execution.

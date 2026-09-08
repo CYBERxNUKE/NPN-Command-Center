@@ -1,6 +1,6 @@
 # Supabase production setup
 
-The migration in `migrations/001_production_foundation.sql` is the backend foundation for authenticated users, households, submissions, evidence photos, review queues, notifications, and postage batches.
+The migrations in `migrations/` provide the backend foundation for authenticated users, households, submissions, evidence photos, review queues, notifications, postage batches, security hardening, household limits, and deduplicated scraper leads.
 
 ## Apply it
 

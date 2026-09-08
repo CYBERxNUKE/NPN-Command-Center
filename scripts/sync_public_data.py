@@ -55,6 +55,7 @@ def reconcile(rows):
 
 opportunities=json.loads((ROOT/'data/opportunities.json').read_text()).get('items',[])
 watchlist=json.loads((ROOT/'data/watchlist.json').read_text()).get('items',[])
+review_leads=json.loads((ROOT/'data/review-leads.json').read_text()).get('items',[]) if (ROOT/'data/review-leads.json').exists() else []
 rows=[]
 for item in opportunities:
     rows.append({
@@ -75,4 +76,19 @@ for item in watchlist:
         'source_kind':source_kind.get(item.get('source'),'secondary'), 'source_last_checked_at':datetime.now(timezone.utc).isoformat()
     })
 sync(rows)
-print(json.dumps({'synced':len(rows),'closed_stale':reconcile(rows)},indent=2))
+def sync_review_leads(leads):
+    if not leads:
+        return
+    payload=[{
+        'lead_key':item.get('leadKey'),
+        'source_url':item.get('sourceUrl'),
+        'raw_payload':{'title':item.get('title',''),'source_name':item.get('sourceName',''),'intake':'secondary_scraper','last_seen':item.get('lastSeen')}
+    } for item in leads if item.get('leadKey') and item.get('sourceUrl')]
+    if not payload:
+        return
+    lead_headers={**headers,'Prefer':'resolution=ignore-duplicates,return=minimal'}
+    response=requests.post(URL+'/rest/v1/review_queue',headers=lead_headers,json=payload,timeout=30)
+    response.raise_for_status()
+
+sync_review_leads(review_leads)
+print(json.dumps({'synced':len(rows),'review_leads':len(review_leads),'closed_stale':reconcile(rows)},indent=2))

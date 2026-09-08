@@ -23,6 +23,9 @@ jobs:
       - name: Scan all release calendars
         continue-on-error: true
         run: python scripts/topps_release_watch.py
+      - name: Collect secondary-source review leads
+        continue-on-error: true
+        run: python scripts/collect_review_leads.py
       - name: Archive expired NPN records
         run: python scripts/archive_expired.py
       - name: Sync public records to Supabase
