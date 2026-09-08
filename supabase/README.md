@@ -26,3 +26,13 @@ The eventual authenticated application needs:
 - `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, and `VAPID_PRIVATE_KEY` for Web Push
 
 GitHub Pages can continue serving the public read-only dashboard. Authenticated writes and workers should run through Supabase Edge Functions or another server-side runtime.
+
+## GitHub Pages secrets
+
+The Pages workflow creates `public-config.js` during deployment. Add these repository or environment secrets to enable the browser client:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `VAPID_PUBLIC_KEY`
+
+When they are absent, the deployment uses the example configuration and cloud sync remains disabled.

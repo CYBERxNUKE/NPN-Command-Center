@@ -23,6 +23,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Configure public client
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+            cat > public-config.js <<EOF
+          window.NPN_CONFIG = {
+            supabaseUrl: "$SUPABASE_URL",
+            supabaseAnonKey: "$SUPABASE_ANON_KEY",
+            appUrl: "https://cyberxnuke.github.io/NPN-Command-Center/",
+            vapidPublicKey: "$VAPID_PUBLIC_KEY"
+          };
+          EOF
+          else
+            cp public-config.example.js public-config.js
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: "."
