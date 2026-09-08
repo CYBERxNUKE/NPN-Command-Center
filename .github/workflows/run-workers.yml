@@ -16,18 +16,24 @@ jobs:
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       SUPABASE_WORKER_SECRET: ${{ secrets.SUPABASE_WORKER_SECRET }}
     steps:
-      - name: Validate worker secrets
+      - name: Check worker configuration
+        id: config
         run: |
-          test -n "$SUPABASE_URL"
-          test -n "$SUPABASE_ANON_KEY"
-          test -n "$SUPABASE_WORKER_SECRET"
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ] && [ -n "$SUPABASE_WORKER_SECRET" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Supabase worker secrets are not configured; skipping scheduled delivery."
+          fi
       - name: Queue deadline alerts
+        if: steps.config.outputs.enabled == 'true'
         run: |
           curl --fail-with-body --silent --show-error --retry 2 \
             -X POST "$SUPABASE_URL/functions/v1/queue-deadline-alerts" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H "x-worker-secret: $SUPABASE_WORKER_SECRET"
       - name: Process notification jobs
+        if: steps.config.outputs.enabled == 'true'
         run: |
           curl --fail-with-body --silent --show-error --retry 2 \
             -X POST "$SUPABASE_URL/functions/v1/process-notifications" \
