@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "NPN Command Center Lead Capture",
+  "version": "0.1.0",
+  "description": "Send the current page to the NPN review queue.",
+  "permissions": ["activeTab", "tabs"],
+  "action": {
+    "default_title": "Save NPN lead",
+    "default_popup": "popup.html"
+  }
+}
