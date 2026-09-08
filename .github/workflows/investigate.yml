@@ -19,9 +19,10 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - name: Check official sources
-        run: |
-          python scripts/watch.py
-          python scripts/topps_release_watch.py
+        run: python scripts/watch.py
+      - name: Check Topps release calendar
+        continue-on-error: true
+        run: python scripts/topps_release_watch.py
       - name: Commit state changes
         run: |
           git config user.name "npn-investigator"
