@@ -62,11 +62,13 @@ jobs:
             const errors=(status.results||[]).filter(x=>x.status==='ERROR');
             const calendarErrors=(watchlist.calendarChecks||[]).filter(x=>x.status==='ERROR');
             if(!errors.length && !calendarErrors.length) return;
-            const lines=errors.map(x=>`- ${x.name}: ${x.url} (${x.error})`).concat(calendarErrors.map(x=>`- ${x.name}: ${x.url} (${x.error})`));
+            const unique=new Map();
+            errors.concat(calendarErrors).forEach(x=>unique.set(x.url, x));
+            const lines=[...unique.values()].map(x=>`- ${x.name}: ${x.url} (${x.error})`);
             const open=await github.paginate(github.rest.issues.listForRepo,{owner:context.repo.owner,repo:context.repo.repo,state:'open',per_page:100});
             if(open.some(issue=>issue.title.startsWith('NPN source checks failed'))) return;
             await github.rest.issues.create({owner:context.repo.owner,repo:context.repo.repo,title:`NPN source checks failed (${lines.length})`,body:`The investigator could not verify these sources:\n\n${lines.join('\n')}\n\nRetry after the source becomes available.`});
       - name: Fail when source checks have errors
         if: always()
         run: |
-          python -c "import json; s=json.load(open('data/engine-status.json')); w=json.load(open('data/watchlist.json')); errors=[x for x in s.get('results',[]) if x.get('status')=='ERROR']+[x for x in w.get('calendarChecks',[]) if x.get('status')=='ERROR']; print(json.dumps({'errors':len(errors)})); raise SystemExit(1 if errors else 0)"
+          python -c "import json; s=json.load(open('data/engine-status.json')); w=json.load(open('data/watchlist.json')); errors={x.get('url') for x in [*s.get('results',[]), *w.get('calendarChecks',[])] if x.get('status')=='ERROR'}; print(json.dumps({'errors':len(errors)})); raise SystemExit(1 if errors else 0)"
