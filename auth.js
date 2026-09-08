@@ -82,6 +82,8 @@
       const json = subscription.toJSON();
       const result = await state.client.from('push_subscriptions').upsert({ owner_id: state.user.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth_key: json.keys.auth }, { onConflict: 'owner_id,endpoint' });
       if (result.error) throw result.error;
+      const preference = await state.client.from('notification_preferences').upsert({ owner_id: state.user.id, channel: 'push', destination: 'browser', enabled: true, event_types: ['deadline_soon', 'source_changed'] }, { onConflict: 'owner_id,channel,destination' });
+      if (preference.error) throw preference.error;
     },
     uploadEvidence: async function (opportunity, file, caption) {
       if (!state.client || !state.user) throw new Error('Sign in before uploading evidence.');
