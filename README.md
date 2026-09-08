@@ -7,7 +7,7 @@ This is not just a static list. It separates:
 - **VERIFIED** official rules/programs
 - **OPEN** actionable opportunities
 - **VERIFY_NPN** release-radar leads
-- submission history stored locally in the browser
+- submission history stored locally as a fallback and in Supabase when configured
 - source monitoring / change detection
 - printable entry packets
 - deadline calculations
@@ -59,15 +59,15 @@ The system therefore uses a two-stage state:
 
 Never convert a lead to VERIFIED merely because a third-party site says so.
 
-## Recommended next-level upgrades
+## Production capabilities
 
 - Supabase/Postgres for multi-device submission history
-- Authentication
-- Email/SMS/push notification worker
-- photo upload of package NPN language for evidence
-- product checklist URL + odds URL
-- prize/card-pool intelligence
-- household/member profiles for rules with household limits
-- USPS postage-cost estimator / batch mail manifest
-- admin review queue for scraper leads
-- browser extension / share-sheet to add a discovered NPN page
+- Magic-link authentication
+- Email/SMS/push notification worker with protected scheduling
+- Safe photo upload of package NPN language for evidence
+- Product checklist URL and odds URL review fields
+- Prize and card-pool intelligence fields
+- Household/member profiles with enforced limits
+- USPS postage estimator and batch mail manifest
+- Admin review queue for scraper and share-sheet leads
+- Browser extension intake for discovered NPN pages
