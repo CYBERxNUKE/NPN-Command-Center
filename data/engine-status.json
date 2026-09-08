@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-09-08T02:15:33.903957+00:00",
-  "completedAt": "2026-09-08T02:15:37.931440+00:00",
+  "startedAt": "2026-09-08T02:40:40.864989+00:00",
+  "completedAt": "2026-09-08T02:40:43.192518+00:00",
   "sourceCount": 6,
   "checkedCount": 3,
   "errorCount": 3,
@@ -8,21 +8,21 @@
     {
       "name": "Topps Access Rules",
       "url": "https://www.topps.com/pages/npn",
-      "checkedAt": "2026-09-08T02:15:33.903957+00:00",
+      "checkedAt": "2026-09-08T02:40:40.864989+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
     },
     {
       "name": "Topps Release Calendar",
       "url": "https://www.topps.com/release-calendar",
-      "checkedAt": "2026-09-08T02:15:33.903957+00:00",
+      "checkedAt": "2026-09-08T02:40:40.864989+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
     },
     {
       "name": "Upper Deck NPN",
       "url": "https://upperdeck.com/sweepstakes/",
-      "checkedAt": "2026-09-08T02:15:33.903957+00:00",
+      "checkedAt": "2026-09-08T02:40:40.864989+00:00",
       "status": 200,
       "signals": [
         "no purchase necessary",
@@ -33,14 +33,14 @@
     {
       "name": "GameStop Power Packs search surface",
       "url": "https://www.gamestop.com/powerpack2026opplatinums01npn",
-      "checkedAt": "2026-09-08T02:15:33.903957+00:00",
+      "checkedAt": "2026-09-08T02:40:40.864989+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.gamestop.com/powerpack2026opplatinums01npn"
     },
     {
       "name": "Panini FAQ / support",
       "url": "https://www.paniniamerica.net/customer-support-faq",
-      "checkedAt": "2026-09-08T02:15:33.903957+00:00",
+      "checkedAt": "2026-09-08T02:40:40.864989+00:00",
       "status": 200,
       "signals": [],
       "changed": false
@@ -48,7 +48,7 @@
     {
       "name": "NPN Offers aggregator",
       "url": "https://npnoffers.com/",
-      "checkedAt": "2026-09-08T02:15:33.903957+00:00",
+      "checkedAt": "2026-09-08T02:40:40.864989+00:00",
       "status": 200,
       "signals": [
         "no purchase necessary"
