@@ -1,0 +1,41 @@
+name: NPN investigator
+
+on:
+  schedule:
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  investigate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Check official sources
+        run: |
+          python scripts/watch.py
+          python scripts/topps_release_watch.py
+      - name: Commit state changes
+        run: |
+          git config user.name "npn-investigator"
+          git config user.email "actions@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "chore: daily NPN source check"
+          git push
+      - name: Create alert issue when sources changed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const log = JSON.parse(fs.readFileSync('data/discovery-log.json','utf8'));
+            const fresh=(log.events||[]).filter(x=>x.type==='SOURCE_CHANGED' && Date.parse(x.time) > Date.now()-20*60*1000);
+            if(!fresh.length) return;
+            const body=fresh.map(x=>`- **${x.source}** changed: ${x.url}\n  Signals: ${(x.signals||[]).join(', ')}`).join('\n');
+            await github.rest.issues.create({owner:context.repo.owner,repo:context.repo.repo,title:`🚨 NPN source change detected (${fresh.length})`,body:`The investigator found official-source changes that need review.\n\n${body}\n\nDo not assume a changed page means a new eligible offer; verify the official rules before mailing.`});

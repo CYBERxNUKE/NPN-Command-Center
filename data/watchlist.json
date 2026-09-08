@@ -1,0 +1,86 @@
+{
+  "generated": "2026-09-05",
+  "items": [
+    {
+      "id": "topps-2026-ag",
+      "manufacturer": "Topps",
+      "product": "2026 Topps Allen & Ginter Baseball",
+      "releaseDate": "2026-09-08",
+      "tentativeDeadline": "2026-10-23",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2026-museum",
+      "manufacturer": "Topps",
+      "product": "2026 Topps Museum Collection Baseball",
+      "releaseDate": "2026-09-08",
+      "tentativeDeadline": "2026-10-23",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2026-bowman-chrome",
+      "manufacturer": "Topps",
+      "product": "2026 Bowman Chrome Baseball",
+      "releaseDate": "2026-09-09",
+      "tentativeDeadline": "2026-10-24",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2026-chrome-mls",
+      "manufacturer": "Topps",
+      "product": "2026 Topps Chrome Major League Soccer",
+      "releaseDate": "2026-09-10",
+      "tentativeDeadline": "2026-10-25",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2026-universe-wwe",
+      "manufacturer": "Topps",
+      "product": "2026 Topps Universe WWE",
+      "releaseDate": "2026-09-11",
+      "tentativeDeadline": "2026-10-26",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2026-update",
+      "manufacturer": "Topps",
+      "product": "2026 Topps Baseball Update Series",
+      "releaseDate": "2026-09-14",
+      "tentativeDeadline": "2026-10-29",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2025-26-definitive-bk",
+      "manufacturer": "Topps",
+      "product": "2025-26 Topps Definitive Basketball",
+      "releaseDate": "2026-09-17",
+      "tentativeDeadline": "2026-11-01",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2025-26-pristine-bk",
+      "manufacturer": "Topps",
+      "product": "2025-26 Topps Pristine Basketball",
+      "releaseDate": "2026-09-24",
+      "tentativeDeadline": "2026-11-08",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    },
+    {
+      "id": "topps-2026-chrome-sw",
+      "manufacturer": "Topps",
+      "product": "2026 Topps Chrome Star Wars",
+      "releaseDate": "2026-09-30",
+      "tentativeDeadline": "2026-11-14",
+      "status": "VERIFY_NPN",
+      "source": "https://www.topps.com/release-calendar"
+    }
+  ]
+}

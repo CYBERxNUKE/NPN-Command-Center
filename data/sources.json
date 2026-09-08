@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "name": "Topps Access Rules",
+      "manufacturer": "Topps",
+      "url": "https://www.topps.com/pages/npn",
+      "type": "official_rules",
+      "priority": 1
+    },
+    {
+      "name": "Topps Release Calendar",
+      "manufacturer": "Topps",
+      "url": "https://www.topps.com/release-calendar",
+      "type": "release_calendar",
+      "priority": 1
+    },
+    {
+      "name": "Upper Deck NPN",
+      "manufacturer": "Upper Deck",
+      "url": "https://upperdeck.com/sweepstakes/",
+      "type": "official_portal",
+      "priority": 1
+    },
+    {
+      "name": "GameStop Power Packs search surface",
+      "manufacturer": "GameStop",
+      "url": "https://www.gamestop.com/",
+      "type": "official_site",
+      "priority": 2
+    },
+    {
+      "name": "Panini FAQ / support",
+      "manufacturer": "Panini",
+      "url": "https://www.paniniamerica.net/customer-support-faq",
+      "type": "official_support",
+      "priority": 2
+    }
+  ]
+}
