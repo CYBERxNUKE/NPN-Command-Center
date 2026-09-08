@@ -75,7 +75,7 @@ function updateStats(){
  cards.innerHTML=list.map(x=>{let d=days(x.postmarkDeadline);return `<article class="card ${deadlineClass(x)} ${m[x.id]?'mailed':''}">
  <div class="mini">${esc(x.manufacturer)} • ${esc(x.category)}</div><h3>${esc(x.product)}</h3>
  <div class="chips"><span class="chip ${x.status==='OPEN'?'open':'verified'}">${esc(x.status)}</span><span class="chip verified">${esc(x.confidence)}</span>${d!==null?`<span class="chip ${d<=7?'urgent':''}">${d} DAYS</span>`:''}</div>
- <div class="kv"><div class="k">Deadline</div><div><b>${esc(x.postmarkDeadline)}</b></div><div class="k">Limit</div><div>${esc(x.entryLimit)}</div><div class="k">Method</div><div>${esc(x.method)}</div><div class="k">Prize</div><div>${esc(x.prize)}</div><div class="k">Verified</div><div>${esc(x.lastVerified)}</div></div>
+ <div class="kv"><div class="k">Deadline</div><div><b>${esc(x.postmarkDeadline)}</b></div><div class="k">Limit</div><div>${esc(x.entryLimit)}</div><div class="k">Method</div><div>${esc(x.method)}</div><div class="k">Prize</div><div>${esc(x.prize)}</div>${x.cardPool?`<div class="k">Card pool</div><div>${esc(x.cardPool)}</div>`:''}<div class="k">Verified</div><div>${esc(x.lastVerified)}</div></div>
  <div class="actions"><button onclick="openPacket('${x.id}')">Entry packet</button><a target="_blank" rel="noopener" href="${esc(x.source)}">Official source ↗</a><button onclick="toggle('${x.id}')">${m[x.id]?'Undo mailed':'Mark mailed'}</button></div></article>`}).join('');
  watchRows.innerHTML=DB.watch.map(x=>`<tr><td>${esc(x.product)}</td><td>${esc(x.manufacturer)}</td><td class="date">${esc(x.releaseDate)}</td><td class="date">${esc(x.tentativeDeadline)}</td><td><span class="chip verify">${esc(x.status)}</span></td></tr>`).join('');
  sourceCards.innerHTML=DB.sources.map(x=>`<div class="source"><div class="health">● WATCHED</div><b>${esc(x.name)}</b><div class="mini">${esc(x.manufacturer)} • priority ${esc(x.priority)}</div><div style="margin-top:8px"><a target="_blank" href="${esc(x.url)}">Open source ↗</a></div></div>`).join('');
@@ -83,10 +83,22 @@ function updateStats(){
   renderSourceHealth();
 }
 function toggle(id){let m=mailed(),next=!m[id],item=DB.opps.find(x=>x.id===id);m[id]=next;localStorage.setItem(mailedKey(),JSON.stringify(m));render();if(window.npnAuth&&window.npnAuth.syncSubmission&&item)window.npnAuth.syncSubmission(item,next?'MAILED':'PLANNED').catch(error=>console.error('Cloud submission sync failed',error))}
-async function hydrateCloudSubmissionState(){
- if(!window.npnAuth||!window.npnAuth.getClient||!window.npnAuth.getUser||!window.npnAuth.getUser())return;
+async function hydrateCloudData(){
+ if(!window.npnAuth||!window.npnAuth.getClient||!DB.opps.length)return;
  const client=window.npnAuth.getClient();
  if(!client)return;
+ const keys=DB.opps.map(item=>item.id).filter(Boolean);
+ const opportunities=await client.from('opportunities').select('id,external_key,checklist_url,odds_url,prize').in('external_key',keys);
+ if(!opportunities.error){
+  const byKey=Object.fromEntries((opportunities.data||[]).map(item=>[item.external_key,item]));
+  DB.opps.forEach(item=>{const cloud=byKey[item.id];if(cloud){item.checklistUrl=cloud.checklist_url||item.checklistUrl;item.oddsUrl=cloud.odds_url||item.oddsUrl;item.prize=cloud.prize||item.prize}});
+  const cloudIds=(opportunities.data||[]).map(item=>item.id);
+  if(cloudIds.length){
+   const prizes=await client.from('opportunity_prizes').select('opportunity_id,prize_name,card_pool,odds_text').in('opportunity_id',cloudIds);
+   if(!prizes.error){const prizeById=Object.fromEntries((prizes.data||[]).map(item=>[item.opportunity_id,item]));DB.opps.forEach(item=>{const cloud=byKey[item.id],prize=cloud&&prizeById[cloud.id];if(prize){item.prize=prize.prize_name||item.prize;item.cardPool=prize.card_pool||item.cardPool;item.oddsText=prize.odds_text||item.oddsText}})}
+  }
+ }
+ if(!window.npnAuth.getUser||!window.npnAuth.getUser()){render();return}
  const result=await client.from('submissions').select('submission_key,status').order('updated_at',{ascending:false});
  if(result.error){console.error('Cloud submission history failed',result.error);return}
  const cloud={};
@@ -96,15 +108,15 @@ async function hydrateCloudSubmissionState(){
  if(sub)sub.textContent='Cloud submission history synced across devices.';
  render();
 }
-window.npnCloudReady=hydrateCloudSubmissionState;
+window.npnCloudReady=hydrateCloudData;
 function openPacket(id){let x=DB.opps.find(y=>y.id===id);sheet.innerHTML=`<button class="close" onclick="closeModal()">Close</button><h2>${esc(x.product)}</h2><p><b>${esc(x.manufacturer)} — ${esc(x.category)}</b></p><div class="kv"><div class="k">Postmark by</div><div>${esc(x.postmarkDeadline)}</div><div class="k">Received by</div><div>${esc(x.receivedDeadline||'—')}</div><div class="k">Entry limit</div><div>${esc(x.entryLimit)}</div><div class="k">Mail to</div><div>${esc(x.address||'See official rules')}</div><div class="k">Attention</div><div>${esc(x.attention||'—')}</div></div><h3>What to do</h3><p>${esc(x.instructions)}</p><h3>Prize / pool</h3><p>${esc(x.prize)}</p><p><b>Official source:</b><br><a href="${esc(x.source)}">${esc(x.source)}</a></p><p><b>Rule:</b> If this packet conflicts with the sponsor's live rules, the sponsor's live rules win.</p><button class="printbtn" onclick="window.print()">Print</button>`;modal.classList.add('on')}
 const baseOpenPacket=openPacket;
-openPacket=function(id){baseOpenPacket(id);let item=DB.opps.find(x=>x.id===id);if(!item||!window.npnAuth)return;sheet.insertAdjacentHTML('beforeend','<hr><h3>Evidence photo</h3><input id="evidenceFile" type="file" accept="image/*"><input id="evidenceCaption" placeholder="Caption" style="display:block;margin-top:8px;padding:7px;width:100%"><button class="printbtn" style="margin-top:8px" onclick="uploadEvidenceForPacket()">Upload evidence</button><div id="evidenceStatus"></div><div id="evidenceList" style="margin-top:10px"></div>');window.currentEvidenceOpportunity=item;loadEvidenceForPacket()};
+openPacket=function(id){baseOpenPacket(id);let item=DB.opps.find(x=>x.id===id);if(!item||!window.npnAuth)return;let research='<hr><h3>Research</h3>';if(item.cardPool)research+='<p><b>Card pool:</b> '+esc(item.cardPool)+'</p>';if(item.checklistUrl)research+='<p><a target="_blank" rel="noopener" href="'+esc(item.checklistUrl)+'">Open product checklist</a></p>';if(item.oddsUrl)research+='<p><a target="_blank" rel="noopener" href="'+esc(item.oddsUrl)+'">Open odds information</a></p>';if(item.oddsText)research+='<p>'+esc(item.oddsText)+'</p>';if(item.cardPool||item.checklistUrl||item.oddsUrl||item.oddsText)sheet.insertAdjacentHTML('beforeend',research);sheet.insertAdjacentHTML('beforeend','<hr><h3>Evidence photo</h3><input id="evidenceFile" type="file" accept="image/*"><input id="evidenceCaption" placeholder="Caption" style="display:block;margin-top:8px;padding:7px;width:100%"><button class="printbtn" style="margin-top:8px" onclick="uploadEvidenceForPacket()">Upload evidence</button><div id="evidenceStatus"></div><div id="evidenceList" style="margin-top:10px"></div>');window.currentEvidenceOpportunity=item;loadEvidenceForPacket()};
 async function loadEvidenceForPacket(){let list=document.getElementById('evidenceList');if(!list)return;try{let items=await window.npnAuth.listEvidence(window.currentEvidenceOpportunity);list.innerHTML=items.length?'<b>Uploaded evidence</b>'+items.map(x=>`<div style="margin-top:8px"><a target="_blank" href="${esc(x.url)}">${esc(x.file_name)}</a><div class="mini">${esc(x.caption||'No caption')} - ${esc(x.created_at)}</div></div>`).join(''):'<span class="mini">No evidence uploaded.</span>'}catch(error){list.textContent=error.message}}
 async function uploadEvidenceForPacket(){let file=document.getElementById('evidenceFile').files[0],statusBox=document.getElementById('evidenceStatus');if(!file){statusBox.textContent='Choose an image first.';return}statusBox.textContent='Uploading...';try{await window.npnAuth.uploadEvidence(window.currentEvidenceOpportunity,file,document.getElementById('evidenceCaption').value);statusBox.textContent='Evidence uploaded.';loadEvidenceForPacket()}catch(error){statusBox.textContent=error.message}}
 function closeModal(){modal.classList.remove('on')}
 function printOpen(){state.value='OPEN';render();setTimeout(()=>window.print(),100)}
-function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadline','receivedDeadline','entryLimit','method','address','attention','source'];let rows=[cols,...DB.opps.map(x=>cols.map(k=>x[k]||''))];let csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='npn-command-center.csv';a.click()}
+function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadline','receivedDeadline','entryLimit','method','address','attention','source','checklistUrl','oddsUrl','prize','cardPool'];let rows=[cols,...DB.opps.map(x=>cols.map(k=>x[k]||''))];let csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='npn-command-center.csv';a.click()}
  async function updateEngineStatus(){
   const badge=document.querySelector('.pulse');
   let detail=document.getElementById('engineDetail');
@@ -125,7 +137,7 @@ function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadli
    detail.textContent='Could not reach investigator status';
   }
  }
-Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.parentElement.firstChild.textContent='Last source check: ';snapshot.textContent=e.completedAt?new Date(e.completedAt).toLocaleString():(o.generated||'Unknown');[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render();hydrateCloudSubmissionState()});
+Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.parentElement.firstChild.textContent='Last source check: ';snapshot.textContent=e.completedAt?new Date(e.completedAt).toLocaleString():(o.generated||'Unknown');[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render();hydrateCloudData()});
  updateEngineStatus();
  setInterval(updateEngineStatus,60000);
 q.oninput=render;maker.onchange=render;state.onchange=render;
