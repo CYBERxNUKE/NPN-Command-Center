@@ -1,0 +1,44 @@
+{
+  "https://www.topps.com/pages/npn": {
+    "name": "Topps Access Rules",
+    "url": "https://www.topps.com/pages/npn",
+    "checkedAt": "2026-09-08T00:55:59.577013+00:00",
+    "status": "ERROR",
+    "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
+  },
+  "https://www.topps.com/release-calendar": {
+    "name": "Topps Release Calendar",
+    "url": "https://www.topps.com/release-calendar",
+    "checkedAt": "2026-09-08T00:55:59.577013+00:00",
+    "status": "ERROR",
+    "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
+  },
+  "https://upperdeck.com/sweepstakes/": {
+    "name": "Upper Deck NPN",
+    "url": "https://upperdeck.com/sweepstakes/",
+    "checkedAt": "2026-09-08T00:55:59.577013+00:00",
+    "status": 200,
+    "signals": [
+      "no purchase necessary",
+      "sweepstakes"
+    ],
+    "changed": false,
+    "sha256": "6a730fa081d7dfd917fa6934b9aaa4d291dd4cdcda04c25cfe1d6f893cc3273f"
+  },
+  "https://www.gamestop.com/": {
+    "name": "GameStop Power Packs search surface",
+    "url": "https://www.gamestop.com/",
+    "checkedAt": "2026-09-08T00:55:59.577013+00:00",
+    "status": "ERROR",
+    "error": "403 Client Error: Forbidden for url: https://www.gamestop.com/"
+  },
+  "https://www.paniniamerica.net/customer-support-faq": {
+    "name": "Panini FAQ / support",
+    "url": "https://www.paniniamerica.net/customer-support-faq",
+    "checkedAt": "2026-09-08T00:55:59.577013+00:00",
+    "status": 200,
+    "signals": [],
+    "changed": false,
+    "sha256": "95526f88b02d3c30014e7427f740827bc31c531caac805b06f44065fa0911978"
+  }
+}

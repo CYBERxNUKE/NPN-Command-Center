@@ -50,7 +50,7 @@ table{width:100%;border-collapse:separate;border-spacing:0;background:#0e151f;bo
 
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
 <script>
-const TODAY=new Date('2026-09-05T12:00:00-05:00'); let DB={opps:[],watch:[],sources:[]};
+const TODAY=new Date('2026-09-05T12:00:00-05:00'); let DB={opps:[],watch:[],sources:[],sourceStatus:{}};
 const mailed=()=>JSON.parse(localStorage.getItem('npn-mailed-v2')||'{}');
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function days(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;return Math.ceil((new Date(s+'T23:59:59-05:00')-TODAY)/86400000)}
@@ -62,7 +62,10 @@ function updateStats(){
  let nearest=DB.opps.filter(x=>days(x.postmarkDeadline)!==null&&days(x.postmarkDeadline)>=0).sort((a,b)=>days(a.postmarkDeadline)-days(b.postmarkDeadline))[0];
  alert.innerHTML=nearest?`<div class="alert"><strong>Closest hard deadline:</strong> ${esc(nearest.product)} — postmark by <b>${esc(nearest.postmarkDeadline)}</b> (${days(nearest.postmarkDeadline)} days).</div>`:'';
 }
-function render(){
+ function renderSourceHealth(){
+  sourceCards.innerHTML=DB.sources.map(x=>{let s=DB.sourceStatus[x.url]||{},ok=s.status&&s.status!=='ERROR',label=ok?'CHECKED '+s.status:'ERROR',checked=s.checkedAt?'Last checked '+new Date(s.checkedAt).toLocaleString():'Not checked yet';return `<div class="source"><div class="health">${label}</div><b>${esc(x.name)}</b><div class="mini">${esc(x.manufacturer)} - priority ${esc(x.priority)}</div><div class="mini" style="margin-top:8px">${esc(checked)}</div><div style="margin-top:8px"><a target="_blank" href="${esc(x.url)}">Open source</a></div></div>`}).join('');
+ }
+ function render(){
  let m=mailed(), mq=maker.value, st=state.value, query=q.value.toLowerCase();
  let list=DB.opps.filter(x=>(!mq||x.manufacturer===mq)&&(!st||x.status===st)&&(!query||JSON.stringify(x).toLowerCase().includes(query)));
  cards.innerHTML=list.map(x=>{let d=days(x.postmarkDeadline);return `<article class="card ${deadlineClass(x)} ${m[x.id]?'mailed':''}">
@@ -72,7 +75,8 @@ function render(){
  <div class="actions"><button onclick="openPacket('${x.id}')">Entry packet</button><a target="_blank" rel="noopener" href="${esc(x.source)}">Official source ↗</a><button onclick="toggle('${x.id}')">${m[x.id]?'Undo mailed':'Mark mailed'}</button></div></article>`}).join('');
  watchRows.innerHTML=DB.watch.map(x=>`<tr><td>${esc(x.product)}</td><td>${esc(x.manufacturer)}</td><td class="date">${esc(x.releaseDate)}</td><td class="date">${esc(x.tentativeDeadline)}</td><td><span class="chip verify">${esc(x.status)}</span></td></tr>`).join('');
  sourceCards.innerHTML=DB.sources.map(x=>`<div class="source"><div class="health">● WATCHED</div><b>${esc(x.name)}</b><div class="mini">${esc(x.manufacturer)} • priority ${esc(x.priority)}</div><div style="margin-top:8px"><a target="_blank" href="${esc(x.url)}">Open source ↗</a></div></div>`).join('');
- updateStats();
+  updateStats();
+  renderSourceHealth();
 }
 function toggle(id){let m=mailed();m[id]=!m[id];localStorage.setItem('npn-mailed-v2',JSON.stringify(m));render()}
 function openPacket(id){let x=DB.opps.find(y=>y.id===id);sheet.innerHTML=`<button class="close" onclick="closeModal()">Close</button><h2>${esc(x.product)}</h2><p><b>${esc(x.manufacturer)} — ${esc(x.category)}</b></p><div class="kv"><div class="k">Postmark by</div><div>${esc(x.postmarkDeadline)}</div><div class="k">Received by</div><div>${esc(x.receivedDeadline||'—')}</div><div class="k">Entry limit</div><div>${esc(x.entryLimit)}</div><div class="k">Mail to</div><div>${esc(x.address||'See official rules')}</div><div class="k">Attention</div><div>${esc(x.attention||'—')}</div></div><h3>What to do</h3><p>${esc(x.instructions)}</p><h3>Prize / pool</h3><p>${esc(x.prize)}</p><p><b>Official source:</b><br><a href="${esc(x.source)}">${esc(x.source)}</a></p><p><b>Rule:</b> If this packet conflicts with the sponsor's live rules, the sponsor's live rules win.</p><button class="printbtn" onclick="window.print()">Print</button>`;modal.classList.add('on')}
@@ -99,7 +103,7 @@ function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadli
    detail.textContent='Could not reach investigator status';
   }
  }
- Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json())]).then(([o,w,s])=>{DB={opps:o.items,watch:w.items,sources:s.items};snapshot.textContent=o.generated;[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
+ Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.textContent=o.generated;[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
  updateEngineStatus();
  setInterval(updateEngineStatus,60000);
 q.oninput=render;maker.onchange=render;state.onchange=render;
