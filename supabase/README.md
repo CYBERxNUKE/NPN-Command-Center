@@ -22,6 +22,7 @@ The eventual authenticated application needs:
 - `RESEND_FROM` for the verified sender identity
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER` for SMS
 - `USPS_CLIENT_ID` and `USPS_CLIENT_SECRET` for live postage rates
+- `USPS_PRICES_URL` set to the approved Domestic Prices API endpoint for the USPS account
 - `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, and `VAPID_PRIVATE_KEY` for Web Push
 
 GitHub Pages can continue serving the public read-only dashboard. Authenticated writes and workers should run through Supabase Edge Functions or another server-side runtime.

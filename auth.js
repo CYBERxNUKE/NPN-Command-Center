@@ -78,6 +78,17 @@
       const json = subscription.toJSON();
       const result = await state.client.from('push_subscriptions').upsert({ owner_id: state.user.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth_key: json.keys.auth }, { onConflict: 'owner_id,endpoint' });
       if (result.error) throw result.error;
+    },
+    uploadEvidence: async function (opportunity, file, caption) {
+      if (!state.client || !state.user) throw new Error('Sign in before uploading evidence.');
+      if (!file || !file.type.startsWith('image/')) throw new Error('Choose an image file.');
+      if (file.size > 10 * 1024 * 1024) throw new Error('Evidence images must be 10 MB or smaller.');
+      const submissionId = await this.syncSubmission(opportunity, 'PREPARED');
+      const path = state.user.id + '/' + crypto.randomUUID() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const upload = await state.client.storage.from('submission-evidence').upload(path, file, { contentType: file.type, upsert: false });
+      if (upload.error) throw upload.error;
+      const result = await state.client.from('submission_evidence').insert({ submission_id: submissionId, owner_id: state.user.id, storage_path: path, file_name: file.name, mime_type: file.type, caption: caption || null });
+      if (result.error) throw result.error;
     }
   };
 
