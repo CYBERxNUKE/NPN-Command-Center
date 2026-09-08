@@ -20,6 +20,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
       - name: Validate Python
         run: python -m compileall -q scripts
       - name: Validate JavaScript
@@ -35,3 +38,10 @@ jobs:
           python -c "import json, pathlib; [json.loads(p.read_text()) for p in pathlib.Path('.').rglob('*.json')]"
       - name: Validate extension manifest
         run: python -c "import json; m=json.load(open('extension/manifest.json')); assert m['manifest_version']==3 and 'action' in m"
+      - name: Validate Edge Functions
+        run: |
+          deno check supabase/functions/calculate-postage/index.ts
+          deno check supabase/functions/process-notifications/index.ts
+          deno check supabase/functions/queue-deadline-alerts/index.ts
+      - name: Validate migration ordering
+        run: python -c "import pathlib,re; files=sorted(pathlib.Path('supabase/migrations').glob('*.sql')); nums=[int(re.match(r'^(\\d+)_',p.name).group(1)) for p in files]; assert nums==sorted(set(nums)) and nums==list(range(1,len(nums)+1)), nums"
