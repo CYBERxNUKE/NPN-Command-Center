@@ -50,7 +50,7 @@ table{width:100%;border-collapse:separate;border-spacing:0;background:#0e151f;bo
 
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
 <script>
-const TODAY=new Date('2026-09-05T12:00:00-05:00'); let DB={opps:[],watch:[],sources:[],sourceStatus:{}};
+const TODAY=new Date(); let DB={opps:[],watch:[],sources:[],sourceStatus:{}};
 const mailed=()=>JSON.parse(localStorage.getItem('npn-mailed-v2')||'{}');
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function days(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;return Math.ceil((new Date(s+'T23:59:59-05:00')-TODAY)/86400000)}
@@ -103,7 +103,7 @@ function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadli
    detail.textContent='Could not reach investigator status';
   }
  }
- Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.textContent=o.generated;[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
+ Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.parentElement.firstChild.textContent='Last source check: ';snapshot.textContent=e.completedAt?new Date(e.completedAt).toLocaleString():(o.generated||'Unknown');[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
  updateEngineStatus();
  setInterval(updateEngineStatus,60000);
 q.oninput=render;maker.onchange=render;state.onchange=render;
