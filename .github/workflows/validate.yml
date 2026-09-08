@@ -1,0 +1,37 @@
+name: Validate application
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate Python
+        run: python -m compileall -q scripts
+      - name: Validate JavaScript
+        run: |
+          node --check auth.js
+          node --check admin.js
+          node --check account.js
+          node --check postage.js
+          node --check manifest.js
+          node --check extension/popup.js
+      - name: Validate JSON
+        run: |
+          python -c "import json, pathlib; [json.loads(p.read_text()) for p in pathlib.Path('.').rglob('*.json')]"
+      - name: Validate extension manifest
+        run: python -c "import json; m=json.load(open('extension/manifest.json')); assert m['manifest_version']==3 and 'action' in m"
