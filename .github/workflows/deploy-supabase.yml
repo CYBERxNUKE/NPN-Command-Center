@@ -13,6 +13,19 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      WORKER_SECRET: ${{ secrets.SUPABASE_WORKER_SECRET }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM: ${{ secrets.RESEND_FROM }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+      USPS_CLIENT_ID: ${{ secrets.USPS_CLIENT_ID }}
+      USPS_CLIENT_SECRET: ${{ secrets.USPS_CLIENT_SECRET }}
+      USPS_PRICES_URL: ${{ secrets.USPS_PRICES_URL }}
+      VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+      VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
@@ -25,10 +38,39 @@ jobs:
           test -n "$SUPABASE_ACCESS_TOKEN"
           test -n "$SUPABASE_PROJECT_REF"
           test -n "$SUPABASE_DB_PASSWORD"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          test -n "$WORKER_SECRET"
+          test -n "$RESEND_API_KEY"
+          test -n "$RESEND_FROM"
+          test -n "$TWILIO_ACCOUNT_SID"
+          test -n "$TWILIO_AUTH_TOKEN"
+          test -n "$TWILIO_FROM_NUMBER"
+          test -n "$USPS_CLIENT_ID"
+          test -n "$USPS_CLIENT_SECRET"
+          test -n "$USPS_PRICES_URL"
+          test -n "$VAPID_SUBJECT"
+          test -n "$VAPID_PUBLIC_KEY"
+          test -n "$VAPID_PRIVATE_KEY"
       - name: Link project
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
       - name: Apply database migrations
         run: supabase db push --password "$SUPABASE_DB_PASSWORD"
+      - name: Configure Edge Function secrets
+        run: |
+          supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+            SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
+            WORKER_SECRET="$WORKER_SECRET" \
+            RESEND_API_KEY="$RESEND_API_KEY" \
+            RESEND_FROM="$RESEND_FROM" \
+            TWILIO_ACCOUNT_SID="$TWILIO_ACCOUNT_SID" \
+            TWILIO_AUTH_TOKEN="$TWILIO_AUTH_TOKEN" \
+            TWILIO_FROM_NUMBER="$TWILIO_FROM_NUMBER" \
+            USPS_CLIENT_ID="$USPS_CLIENT_ID" \
+            USPS_CLIENT_SECRET="$USPS_CLIENT_SECRET" \
+            USPS_PRICES_URL="$USPS_PRICES_URL" \
+            VAPID_SUBJECT="$VAPID_SUBJECT" \
+            VAPID_PUBLIC_KEY="$VAPID_PUBLIC_KEY" \
+            VAPID_PRIVATE_KEY="$VAPID_PRIVATE_KEY"
       - name: Deploy notification worker
         run: supabase functions deploy process-notifications --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
       - name: Deploy deadline producer

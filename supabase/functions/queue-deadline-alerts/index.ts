@@ -2,7 +2,13 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
-Deno.serve(async () => {
+function authorized(request: Request) {
+  const secret = Deno.env.get('WORKER_SECRET');
+  return Boolean(secret && request.headers.get('x-worker-secret') === secret);
+}
+
+Deno.serve(async (request) => {
+  if (!authorized(request)) return Response.json({ error: 'Unauthorized' }, { status: 401 });
   const today = new Date();
   const end = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
   const startDate = today.toISOString().slice(0, 10);

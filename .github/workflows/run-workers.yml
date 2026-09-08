@@ -1,0 +1,35 @@
+name: Run NPN workers
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workers:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_WORKER_SECRET: ${{ secrets.SUPABASE_WORKER_SECRET }}
+    steps:
+      - name: Validate worker secrets
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_ANON_KEY"
+          test -n "$SUPABASE_WORKER_SECRET"
+      - name: Queue deadline alerts
+        run: |
+          curl --fail-with-body --silent --show-error --retry 2 \
+            -X POST "$SUPABASE_URL/functions/v1/queue-deadline-alerts" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "x-worker-secret: $SUPABASE_WORKER_SECRET"
+      - name: Process notification jobs
+        run: |
+          curl --fail-with-body --silent --show-error --retry 2 \
+            -X POST "$SUPABASE_URL/functions/v1/process-notifications" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "x-worker-secret: $SUPABASE_WORKER_SECRET"

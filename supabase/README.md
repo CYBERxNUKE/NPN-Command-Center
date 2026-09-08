@@ -24,6 +24,7 @@ The eventual authenticated application needs:
 - `USPS_CLIENT_ID` and `USPS_CLIENT_SECRET` for live postage rates
 - `USPS_PRICES_URL` set to the approved Domestic Prices API endpoint for the USPS account
 - `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, and `VAPID_PRIVATE_KEY` for Web Push
+- `WORKER_SECRET` shared only by the scheduled worker trigger and the Edge Functions
 
 GitHub Pages can continue serving the public read-only dashboard. Authenticated writes and workers should run through Supabase Edge Functions or another server-side runtime.
 
@@ -39,6 +40,6 @@ When they are absent, the deployment uses the example configuration and cloud sy
 
 The daily investigator also runs `scripts/sync_public_data.py` when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured as GitHub Actions secrets. That bridge upserts the JSON opportunity and radar records into Postgres without exposing the service-role key to Pages.
 
-Run the `Deploy Supabase backend` GitHub Actions workflow after adding `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, and `SUPABASE_DB_PASSWORD` as repository secrets. It applies all migrations and deploys the three Edge Functions.
+Run the `Deploy Supabase backend` GitHub Actions workflow after adding the Supabase, provider, USPS, VAPID, and worker secrets as repository secrets. It applies all migrations, configures Edge Function secrets, and deploys the three Edge Functions.
 
-Deploy `queue-deadline-alerts` on a recurring Supabase schedule before `process-notifications`. The producer creates deduplicated seven-day deadline jobs; the worker delivers them and retries transient provider failures up to two times.
+The `Run NPN workers` workflow invokes the protected producer and notification worker every 15 minutes. The producer creates deduplicated seven-day deadline jobs; the worker delivers them and retries transient provider failures up to two times.

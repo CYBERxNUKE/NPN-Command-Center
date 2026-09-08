@@ -18,10 +18,10 @@
 | Multi-device history | `submissions` and `record_submission` | Apply migrations and configure Supabase |
 | Authentication | Supabase Auth and `profiles` | Configure providers and redirect URLs |
 | Email, SMS, push | `notification_preferences`, `notification_jobs` | Deploy worker, provider credentials, and scheduler |
-| Package evidence | `submission_evidence` and `submission-evidence` bucket | Add signed evidence viewer |
-| Checklist and odds | `opportunities.checklist_url`, `opportunities.odds_url` | Add admin editing and validation UI |
+| Package evidence | `submission_evidence` and `submission-evidence` bucket | Signed viewer is included; configure storage |
+| Checklist and odds | `opportunities.checklist_url`, `opportunities.odds_url` | Admin editing is included; validate official URLs |
 | Prize intelligence | `opportunity_prizes` | Add review and source citation UI |
-| Household limits | `household_members.limits` | Add rule evaluation before submission creation |
+| Household limits | `households.limits`, `household_members.limits` | Configure limits per household and member |
 | USPS manifests | `postage_batches` and `postage_batch_items` | Configure USPS endpoint and address validation |
 | Admin review | `review_queue` | Apply migrations and configure admin role |
 | Extension/share sheet | `review_queue` | Load extension and configure Supabase |

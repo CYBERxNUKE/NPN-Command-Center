@@ -53,12 +53,17 @@ async function sendPush(ownerId: string, payload: Record<string, unknown>) {
   }
 }
 
-Deno.serve(async () => {
-  const { data: jobs, error } = await supabase.from('notification_jobs').select('*').eq('status', 'queued').lte('available_at', new Date().toISOString()).order('created_at').limit(25);
+function authorized(request: Request) {
+  const secret = Deno.env.get('WORKER_SECRET');
+  return Boolean(secret && request.headers.get('x-worker-secret') === secret);
+}
+
+Deno.serve(async (request) => {
+  if (!authorized(request)) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  const { data: jobs, error } = await supabase.rpc('claim_notification_jobs', { p_limit: 25 });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   const results = [];
   for (const job of jobs || []) {
-    await supabase.from('notification_jobs').update({ status: 'processing', attempts: job.attempts + 1 }).eq('id', job.id);
     try {
       if (job.channel === 'email' || job.channel === 'sms') {
         const { data: preference } = await supabase.from('notification_preferences').select('destination').eq('owner_id', job.owner_id).eq('channel', job.channel).eq('enabled', true).limit(1).maybeSingle();
@@ -70,11 +75,11 @@ Deno.serve(async () => {
       } else {
         throw new Error(`Unsupported notification channel: ${job.channel}`);
       }
-      await supabase.from('notification_jobs').update({ status: 'sent', sent_at: new Date().toISOString(), last_error: null }).eq('id', job.id);
+      await supabase.from('notification_jobs').update({ status: 'sent', sent_at: new Date().toISOString(), locked_at: null, last_error: null }).eq('id', job.id);
       results.push({ id: job.id, status: 'sent' });
     } catch (error) {
       const retry = job.attempts + 1 < 3;
-      await supabase.from('notification_jobs').update({ status: retry ? 'queued' : 'failed', available_at: retry ? new Date(Date.now() + (job.attempts + 1) * 5 * 60 * 1000).toISOString() : job.available_at, last_error: text(error) }).eq('id', job.id);
+      await supabase.from('notification_jobs').update({ status: retry ? 'queued' : 'failed', locked_at: null, available_at: retry ? new Date(Date.now() + (job.attempts + 1) * 5 * 60 * 1000).toISOString() : job.available_at, last_error: text(error) }).eq('id', job.id);
       results.push({ id: job.id, status: retry ? 'queued' : 'failed', error: text(error) });
     }
   }
