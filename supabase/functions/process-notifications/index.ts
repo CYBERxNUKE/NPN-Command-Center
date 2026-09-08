@@ -49,7 +49,16 @@ async function sendPush(ownerId: string, payload: Record<string, unknown>) {
   const { data: subscriptions, error } = await supabase.from('push_subscriptions').select('endpoint,p256dh,auth_key').eq('owner_id', ownerId);
   if (error) throw error;
   for (const subscription of subscriptions || []) {
-    await webpush.sendNotification({ endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth_key } }, JSON.stringify({ title: text(payload.subject || 'NPN Command Center'), body: text(payload.message) }));
+    try {
+      await webpush.sendNotification({ endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth_key } }, JSON.stringify({ title: text(payload.subject || 'NPN Command Center'), body: text(payload.message), url: text(payload.url || '/') }));
+    } catch (error) {
+      const statusCode = (error as { statusCode?: number }).statusCode;
+      if (statusCode === 404 || statusCode === 410) {
+        await supabase.from('push_subscriptions').delete().eq('owner_id', ownerId).eq('endpoint', subscription.endpoint);
+        continue;
+      }
+      throw error;
+    }
   }
 }
 
