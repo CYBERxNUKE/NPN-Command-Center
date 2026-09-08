@@ -73,8 +73,9 @@ Deno.serve(async () => {
       await supabase.from('notification_jobs').update({ status: 'sent', sent_at: new Date().toISOString(), last_error: null }).eq('id', job.id);
       results.push({ id: job.id, status: 'sent' });
     } catch (error) {
-      await supabase.from('notification_jobs').update({ status: 'failed', last_error: text(error) }).eq('id', job.id);
-      results.push({ id: job.id, status: 'failed', error: text(error) });
+      const retry = job.attempts + 1 < 3;
+      await supabase.from('notification_jobs').update({ status: retry ? 'queued' : 'failed', available_at: retry ? new Date(Date.now() + (job.attempts + 1) * 5 * 60 * 1000).toISOString() : job.available_at, last_error: text(error) }).eq('id', job.id);
+      results.push({ id: job.id, status: retry ? 'queued' : 'failed', error: text(error) });
     }
   }
   return Response.json({ processed: results.length, results });

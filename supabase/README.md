@@ -38,3 +38,5 @@ The Pages workflow creates `public-config.js` during deployment. Add these repos
 When they are absent, the deployment uses the example configuration and cloud sync remains disabled.
 
 The daily investigator also runs `scripts/sync_public_data.py` when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured as GitHub Actions secrets. That bridge upserts the JSON opportunity and radar records into Postgres without exposing the service-role key to Pages.
+
+Deploy `queue-deadline-alerts` on a recurring Supabase schedule before `process-notifications`. The producer creates deduplicated seven-day deadline jobs; the worker delivers them and retries transient provider failures up to two times.
