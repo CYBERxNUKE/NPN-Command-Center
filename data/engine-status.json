@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-09-08T00:57:47.196130+00:00",
-  "completedAt": "2026-09-08T00:57:48.131233+00:00",
+  "startedAt": "2026-09-08T01:00:54.749749+00:00",
+  "completedAt": "2026-09-08T01:00:56.650355+00:00",
   "sourceCount": 5,
   "checkedCount": 2,
   "errorCount": 3,
@@ -8,21 +8,21 @@
     {
       "name": "Topps Access Rules",
       "url": "https://www.topps.com/pages/npn",
-      "checkedAt": "2026-09-08T00:57:47.196130+00:00",
+      "checkedAt": "2026-09-08T01:00:54.749749+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
     },
     {
       "name": "Topps Release Calendar",
       "url": "https://www.topps.com/release-calendar",
-      "checkedAt": "2026-09-08T00:57:47.196130+00:00",
+      "checkedAt": "2026-09-08T01:00:54.749749+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
     },
     {
       "name": "Upper Deck NPN",
       "url": "https://upperdeck.com/sweepstakes/",
-      "checkedAt": "2026-09-08T00:57:47.196130+00:00",
+      "checkedAt": "2026-09-08T01:00:54.749749+00:00",
       "status": 200,
       "signals": [
         "no purchase necessary",
@@ -32,15 +32,15 @@
     },
     {
       "name": "GameStop Power Packs search surface",
-      "url": "https://www.gamestop.com/",
-      "checkedAt": "2026-09-08T00:57:47.196130+00:00",
+      "url": "https://www.gamestop.com/powerpack2026opplatinums01npn",
+      "checkedAt": "2026-09-08T01:00:54.749749+00:00",
       "status": "ERROR",
-      "error": "403 Client Error: Forbidden for url: https://www.gamestop.com/"
+      "error": "403 Client Error: Forbidden for url: https://www.gamestop.com/powerpack2026opplatinums01npn"
     },
     {
       "name": "Panini FAQ / support",
       "url": "https://www.paniniamerica.net/customer-support-faq",
-      "checkedAt": "2026-09-08T00:57:47.196130+00:00",
+      "checkedAt": "2026-09-08T01:00:54.749749+00:00",
       "status": 200,
       "signals": [],
       "changed": false
