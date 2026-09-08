@@ -26,10 +26,10 @@ jobs:
       - name: Archive expired NPN records
         run: python scripts/archive_expired.py
       - name: Sync public records to Supabase
-        if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != '' }}
         run: python scripts/sync_public_data.py
       - name: Commit state changes
         run: |
