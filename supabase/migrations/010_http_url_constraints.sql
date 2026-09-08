@@ -57,10 +57,10 @@ begin
   if nullif(trim(p_product), '') is null or not public.is_http_url(trim(p_source_url)) then
     raise exception 'Product and HTTP source URL are required';
   end if;
-  if p_checklist_url is not null and not public.is_http_url(trim(p_checklist_url)) then
+  if nullif(trim(p_checklist_url), '') is not null and not public.is_http_url(trim(p_checklist_url)) then
     raise exception 'Checklist URL must use HTTP or HTTPS';
   end if;
-  if p_odds_url is not null and not public.is_http_url(trim(p_odds_url)) then
+  if nullif(trim(p_odds_url), '') is not null and not public.is_http_url(trim(p_odds_url)) then
     raise exception 'Odds URL must use HTTP or HTTPS';
   end if;
 
