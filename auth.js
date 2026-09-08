@@ -22,7 +22,7 @@
       };
       return;
     }
-    panel.innerHTML = '<b>Signed in</b><div style="color:#91a3ba;margin-top:4px">' + state.user.email + '</div><button id="npnPush" style="margin-top:7px;padding:5px">Enable push</button><button id="npnSignOut" style="margin:7px 0 0 5px;padding:5px">Sign out</button>';
+    panel.innerHTML = '<b>Signed in</b><div style="color:#91a3ba;margin-top:4px">' + state.user.email + '</div><div style="margin-top:6px"><a href="account.html" style="color:#9bc3ff">Household</a> | <a href="admin.html" style="color:#9bc3ff">Review queue</a></div><button id="npnPush" style="margin-top:7px;padding:5px">Enable push</button><button id="npnSignOut" style="margin:7px 0 0 5px;padding:5px">Sign out</button>';
     document.getElementById('npnPush').onclick = async function () {
       try { await window.npnAuth.enablePush(); render('Push notifications enabled.'); } catch (error) { render(error.message); }
     };

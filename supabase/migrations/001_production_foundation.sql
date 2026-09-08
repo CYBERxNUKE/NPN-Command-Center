@@ -197,8 +197,9 @@ create policy households_member_read on public.households for select using (publ
 create policy households_owner_write on public.households for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 create policy members_household_access on public.household_members for all using (public.is_household_member(household_id)) with check (public.is_household_member(household_id));
 create policy opportunities_public_read on public.opportunities for select using (true);
-create policy opportunities_authenticated_write on public.opportunities for insert with check (auth.uid() is not null);
+create policy opportunities_admin_write on public.opportunities for all using (public.is_admin()) with check (public.is_admin());
 create policy opportunity_prizes_public_read on public.opportunity_prizes for select using (true);
+create policy opportunity_prizes_admin_write on public.opportunity_prizes for all using (public.is_admin()) with check (public.is_admin());
 create policy submissions_household_access on public.submissions for all using (owner_id = auth.uid() or public.is_household_member(household_id)) with check (owner_id = auth.uid() or public.is_household_member(household_id));
 create policy evidence_owner_access on public.submission_evidence for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 create policy notification_preferences_owner on public.notification_preferences for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
