@@ -54,7 +54,8 @@ table{width:100%;border-collapse:separate;border-spacing:0;background:#0e151f;bo
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
 <script>
 const TODAY=new Date(); let DB={opps:[],watch:[],sources:[],sourceStatus:{}};
-const mailed=()=>JSON.parse(localStorage.getItem('npn-mailed-v2')||'{}');
+function mailedKey(){let user=window.npnAuth&&window.npnAuth.getUser&&window.npnAuth.getUser();return 'npn-mailed-v2'+(user?':'+user.id:'')}
+const mailed=()=>JSON.parse(localStorage.getItem(mailedKey())||'{}');
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function days(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;return Math.ceil((new Date(s+'T23:59:59-05:00')-TODAY)/86400000)}
 function deadlineClass(x){let d=days(x.postmarkDeadline);return d!==null&&d<=7?'urgent':d!==null&&d<=14?'soon':''}
@@ -81,7 +82,21 @@ function updateStats(){
   updateStats();
   renderSourceHealth();
 }
-function toggle(id){let m=mailed(),next=!m[id],item=DB.opps.find(x=>x.id===id);m[id]=next;localStorage.setItem('npn-mailed-v2',JSON.stringify(m));render();if(window.npnAuth&&window.npnAuth.syncSubmission&&item)window.npnAuth.syncSubmission(item,next?'MAILED':'PLANNED').catch(error=>console.error('Cloud submission sync failed',error))}
+function toggle(id){let m=mailed(),next=!m[id],item=DB.opps.find(x=>x.id===id);m[id]=next;localStorage.setItem(mailedKey(),JSON.stringify(m));render();if(window.npnAuth&&window.npnAuth.syncSubmission&&item)window.npnAuth.syncSubmission(item,next?'MAILED':'PLANNED').catch(error=>console.error('Cloud submission sync failed',error))}
+async function hydrateCloudSubmissionState(){
+ if(!window.npnAuth||!window.npnAuth.getClient||!window.npnAuth.getUser||!window.npnAuth.getUser())return;
+ const client=window.npnAuth.getClient();
+ if(!client)return;
+ const result=await client.from('submissions').select('submission_key,status').order('updated_at',{ascending:false});
+ if(result.error){console.error('Cloud submission history failed',result.error);return}
+ const cloud={};
+ (result.data||[]).forEach(row=>{let key=String(row.submission_key||'').split(':')[0];if(key&&['MAILED','RECEIVED','WON'].includes(row.status))cloud[key]=true;else if(key&&['PLANNED','PREPARED','LOST','CANCELLED'].includes(row.status))cloud[key]=false});
+ localStorage.setItem(mailedKey(),JSON.stringify({...mailed(),...cloud}));
+ const sub=document.querySelector('#queue .sub');
+ if(sub)sub.textContent='Cloud submission history synced across devices.';
+ render();
+}
+window.npnCloudReady=hydrateCloudSubmissionState;
 function openPacket(id){let x=DB.opps.find(y=>y.id===id);sheet.innerHTML=`<button class="close" onclick="closeModal()">Close</button><h2>${esc(x.product)}</h2><p><b>${esc(x.manufacturer)} — ${esc(x.category)}</b></p><div class="kv"><div class="k">Postmark by</div><div>${esc(x.postmarkDeadline)}</div><div class="k">Received by</div><div>${esc(x.receivedDeadline||'—')}</div><div class="k">Entry limit</div><div>${esc(x.entryLimit)}</div><div class="k">Mail to</div><div>${esc(x.address||'See official rules')}</div><div class="k">Attention</div><div>${esc(x.attention||'—')}</div></div><h3>What to do</h3><p>${esc(x.instructions)}</p><h3>Prize / pool</h3><p>${esc(x.prize)}</p><p><b>Official source:</b><br><a href="${esc(x.source)}">${esc(x.source)}</a></p><p><b>Rule:</b> If this packet conflicts with the sponsor's live rules, the sponsor's live rules win.</p><button class="printbtn" onclick="window.print()">Print</button>`;modal.classList.add('on')}
 const baseOpenPacket=openPacket;
 openPacket=function(id){baseOpenPacket(id);let item=DB.opps.find(x=>x.id===id);if(!item||!window.npnAuth)return;sheet.insertAdjacentHTML('beforeend','<hr><h3>Evidence photo</h3><input id="evidenceFile" type="file" accept="image/*"><input id="evidenceCaption" placeholder="Caption" style="display:block;margin-top:8px;padding:7px;width:100%"><button class="printbtn" style="margin-top:8px" onclick="uploadEvidenceForPacket()">Upload evidence</button><div id="evidenceStatus"></div><div id="evidenceList" style="margin-top:10px"></div>');window.currentEvidenceOpportunity=item;loadEvidenceForPacket()};
@@ -110,7 +125,7 @@ function exportCSV(){let cols=['manufacturer','product','status','postmarkDeadli
    detail.textContent='Could not reach investigator status';
   }
  }
- Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.parentElement.firstChild.textContent='Last source check: ';snapshot.textContent=e.completedAt?new Date(e.completedAt).toLocaleString():(o.generated||'Unknown');[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render()});
+Promise.all([fetch('data/opportunities.json').then(r=>r.json()),fetch('data/watchlist.json').then(r=>r.json()),fetch('data/sources.json').then(r=>r.json()),fetch('data/engine-status.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():{results:[]})]).then(([o,w,s,e])=>{DB={opps:o.items,watch:w.items,sources:s.items,sourceStatus:Object.fromEntries((e.results||[]).map(x=>[x.url,x]))};snapshot.parentElement.firstChild.textContent='Last source check: ';snapshot.textContent=e.completedAt?new Date(e.completedAt).toLocaleString():(o.generated||'Unknown');[...new Set(DB.opps.map(x=>x.manufacturer))].sort().forEach(v=>{let e=document.createElement('option');e.textContent=e.value=v;maker.appendChild(e)});render();hydrateCloudSubmissionState()});
  updateEngineStatus();
  setInterval(updateEngineStatus,60000);
 q.oninput=render;maker.onchange=render;state.onchange=render;

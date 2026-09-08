@@ -29,6 +29,10 @@
     document.getElementById('npnSignOut').onclick = function () { state.client.auth.signOut(); };
   }
 
+  function notifyDashboard() {
+    if (typeof window.npnCloudReady === 'function') window.npnCloudReady();
+  }
+
   async function captureShareLead() {
     if (!intakeUrl || !state.user || sessionStorage.getItem('npn-intake-' + intakeUrl)) return;
     const result = await state.client.from('review_queue').insert({ submitted_by: state.user.id, source_url: intakeUrl, raw_payload: { title: intakeTitle, intake: 'share_sheet' } });
@@ -107,8 +111,8 @@
 
   if (window.supabase && config.supabaseUrl && config.supabaseAnonKey && !config.supabaseUrl.includes('YOUR_')) {
     state.client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-    state.client.auth.getSession().then(function (result) { state.user = result.data.session && result.data.session.user; render(); captureShareLead(); });
-    state.client.auth.onAuthStateChange(function (_event, session) { state.user = session && session.user; render(); captureShareLead(); });
+    state.client.auth.getSession().then(function (result) { state.user = result.data.session && result.data.session.user; render(); captureShareLead(); notifyDashboard(); });
+    state.client.auth.onAuthStateChange(function (_event, session) { state.user = session && session.user; render(); captureShareLead(); notifyDashboard(); });
   } else {
     render();
   }
