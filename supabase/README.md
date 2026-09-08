@@ -36,3 +36,5 @@ The Pages workflow creates `public-config.js` during deployment. Add these repos
 - `VAPID_PUBLIC_KEY`
 
 When they are absent, the deployment uses the example configuration and cloud sync remains disabled.
+
+The daily investigator also runs `scripts/sync_public_data.py` when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured as GitHub Actions secrets. That bridge upserts the JSON opportunity and radar records into Postgres without exposing the service-role key to Pages.
