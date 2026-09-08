@@ -39,4 +39,6 @@ When they are absent, the deployment uses the example configuration and cloud sy
 
 The daily investigator also runs `scripts/sync_public_data.py` when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured as GitHub Actions secrets. That bridge upserts the JSON opportunity and radar records into Postgres without exposing the service-role key to Pages.
 
+Run the `Deploy Supabase backend` GitHub Actions workflow after adding `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, and `SUPABASE_DB_PASSWORD` as repository secrets. It applies all migrations and deploys the three Edge Functions.
+
 Deploy `queue-deadline-alerts` on a recurring Supabase schedule before `process-notifications`. The producer creates deduplicated seven-day deadline jobs; the worker delivers them and retries transient provider failures up to two times.
