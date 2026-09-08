@@ -44,4 +44,4 @@ jobs:
           deno check supabase/functions/process-notifications/index.ts
           deno check supabase/functions/queue-deadline-alerts/index.ts
       - name: Validate migration ordering
-        run: python -c "import pathlib,re; files=sorted(pathlib.Path('supabase/migrations').glob('*.sql')); nums=[int(re.match(r'^(\\d+)_',p.name).group(1)) for p in files]; assert nums==sorted(set(nums)) and nums==list(range(1,len(nums)+1)), nums"
+        run: python -c "import pathlib; files=sorted(pathlib.Path('supabase/migrations').glob('*.sql')); nums=[int(p.name.split('_',1)[0]) for p in files]; assert nums==sorted(set(nums)) and nums==list(range(1,len(nums)+1)), nums"
