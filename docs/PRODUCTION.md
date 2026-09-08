@@ -20,13 +20,25 @@
 | Email, SMS, push | `notification_preferences`, `notification_jobs` | Deploy worker, provider credentials, and scheduler |
 | Package evidence | `submission_evidence` and `submission-evidence` bucket | Signed viewer is included; configure storage |
 | Checklist and odds | `opportunities.checklist_url`, `opportunities.odds_url` | Admin editing is included; validate official URLs |
-| Prize intelligence | `opportunity_prizes` | Add review and source citation UI |
+| Prize intelligence | `opportunity_prizes` | Review and source citation UI is included |
 | Household limits | `households.limits`, `household_members.limits` | Configure limits per household and member |
 | USPS manifests | `postage_batches` and `postage_batch_items` | Configure USPS endpoint and address validation |
 | Admin review | `review_queue` and `scripts/collect_review_leads.py` | Apply migrations and configure admin role |
 | Extension/share sheet | `review_queue` | Load extension and configure Supabase |
 
 The repository now includes the authenticated account, admin, postage, and manifest pages; the browser extension; the notification and USPS Edge Function sources; and the JSON-to-Supabase sync worker. External provider credentials and a Supabase project are still required for live execution.
+
+## First administrator
+
+After the first user signs in through the configured magic-link provider, copy that user's UUID from Supabase Authentication and run this in the SQL editor:
+
+```sql
+insert into public.profiles (id, role)
+values ('USER_UUID_HERE', 'admin')
+on conflict (id) do update set role = 'admin';
+```
+
+The trusted SQL-editor context is allowed to provision the first administrator. Authenticated browser clients cannot assign themselves the administrator role.
 
 ## Safety requirements before launch
 

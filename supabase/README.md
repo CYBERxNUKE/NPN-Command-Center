@@ -11,6 +11,8 @@ The migrations in `migrations/` provide the backend foundation for authenticated
 
 The second migration adds the `record_submission` RPC. When an authenticated user marks an opportunity mailed, the client uses this RPC to create or update a private submission record and a default household/member. It is safe to call repeatedly for the same user and opportunity.
 
+After the first user signs in, provision the first administrator from the Supabase SQL editor with `insert into public.profiles (id, role) values ('USER_UUID_HERE', 'admin') on conflict (id) do update set role = 'admin';`. Browser clients cannot self-assign this role.
+
 ## Runtime configuration
 
 The eventual authenticated application needs:
