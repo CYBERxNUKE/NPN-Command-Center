@@ -83,13 +83,13 @@
       "source": "https://www.topps.com/release-calendar"
     }
   ],
-  "lastCalendarCheck": "2026-09-11T16:34:03.453707+00:00",
+  "lastCalendarCheck": "2026-09-12T15:35:57.013212+00:00",
   "calendarChecks": [
     {
       "name": "Topps Release Calendar",
       "url": "https://www.topps.com/release-calendar",
-      "status": "ERROR",
-      "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
+      "status": "SKIPPED",
+      "error": "calendar denied automated access (HTTP 403); retained last known products"
     }
   ],
   "calendarSource": [
