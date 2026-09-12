@@ -10,6 +10,11 @@ WATCHLIST=ROOT/"data/watchlist.json"
 MONTHS="Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
 DATE_RE=re.compile(r"\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)?[,]?\s*(?:"+MONTHS+r")\s+\d{1,2}(?:[,]?\s+\d{4})?",re.I)
 YEAR_RE=re.compile(r"\b(?:19|20)\d{2}\b")
+REQUEST_HEADERS={
+    "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language":"en-US,en;q=0.8",
+    "User-Agent":"NPNCommandCenter/1.0 (+personal research; polite daily monitor)",
+}
 
 def clean(value):
     return re.sub(r"\s+"," "," ".join(str(value or "").split())).strip()
@@ -88,7 +93,7 @@ for source in calendars:
     url=source["url"]
     manufacturer=source.get("manufacturer",source.get("name","Unknown"))
     try:
-        response=requests.get(url,headers={"User-Agent":"Mozilla/5.0 NPNCommandCenter"},timeout=25)
+        response=requests.get(url,headers=REQUEST_HEADERS,timeout=25)
         response.raise_for_status()
         releases=parse_releases(response.text,now.year,manufacturer)
         if not releases:
@@ -109,6 +114,17 @@ for source in calendars:
         removed+=len(old)-sum(1 for release in releases if release["product"].casefold() in old)
         synced.extend(current)
         checks.append({"name":source.get("name"),"url":url,"status":"OK","products":len(releases)})
+    except requests.HTTPError as error:
+        synced.extend(item for item in existing if item.get("source")==url)
+        if error.response is not None and error.response.status_code == 403:
+            checks.append({
+                "name":source.get("name"),
+                "url":url,
+                "status":"SKIPPED",
+                "error":"calendar denied automated access (HTTP 403); retained last known products",
+            })
+        else:
+            checks.append({"name":source.get("name"),"url":url,"status":"ERROR","error":str(error)})
     except Exception as error:
         synced.extend(item for item in existing if item.get("source")==url)
         checks.append({"name":source.get("name"),"url":url,"status":"ERROR","error":str(error)})
@@ -120,5 +136,5 @@ data["calendarSource"]=[source["url"] for source in calendars]
 data["syncSummary"]={"added":added,"updated":updated,"removed":removed,"successfulCalendars":successful,"calendarCount":len(calendars)}
 WATCHLIST.write_text(json.dumps(data,indent=2)+"\n")
 print(json.dumps(data["syncSummary"]|{"checks":checks},indent=2))
-if calendars and successful==0:
+if calendars and successful==0 and not any(check["status"] == "SKIPPED" for check in checks):
     raise SystemExit(1)
