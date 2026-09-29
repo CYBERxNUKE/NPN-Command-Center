@@ -1,4 +1,33 @@
 {
-  "generated": "2026-09-08",
-  "items": []
+  "generated": "2026-09-29",
+  "items": [
+    {
+      "id": "gamestop-op-platinum-s1-2026",
+      "manufacturer": "GameStop",
+      "program": "Power Packs",
+      "product": "One Piece Platinum Series 1",
+      "category": "NPN Sweepstakes",
+      "sport": "TCG",
+      "status": "OPEN",
+      "confidence": "VERIFIED",
+      "discovered": "2026-09-05",
+      "lastVerified": "2026-09-05",
+      "releaseDate": "",
+      "postmarkDeadline": "2026-09-28",
+      "receivedDeadline": "2026-10-08",
+      "entryLimit": "1 entry per entrant",
+      "method": "Mail",
+      "address": "625 Westport Parkway, Grapevine, TX 76051",
+      "attention": "Power Packs One Piece Platinum Series 1 GameStop Trading Card Products Sweepstakes",
+      "instructions": "Hand-print required entrant information on a 3\u00d75 card and mail one card per #10 envelope with proper postage. Follow the official rules exactly.",
+      "prize": "Ultimate Chase Card",
+      "source": "https://www.gamestop.com/powerpack2026opplatinums01npn",
+      "sourceType": "OFFICIAL_RULES",
+      "notes": "US-only sweepstakes. Current rules page verified.",
+      "archivedAt": "2026-09-29T18:07:14.192166+00:00",
+      "expirationReason": "Postmark deadline passed",
+      "expiredDate": "2026-09-28"
+    }
+  ],
+  "lastArchiveRun": "2026-09-29T18:07:14.192178+00:00"
 }
