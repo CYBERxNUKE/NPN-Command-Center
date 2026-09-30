@@ -1,6 +1,30 @@
 {
   "events": [
     {
+      "time": "2026-09-30T18:01:09.584685+00:00",
+      "type": "SOURCE_ERROR",
+      "source": "Topps Access Rules",
+      "url": "https://www.topps.com/pages/npn",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
+    },
+    {
+      "time": "2026-09-30T18:01:09.584685+00:00",
+      "type": "SOURCE_ERROR",
+      "source": "Topps Release Calendar",
+      "url": "https://www.topps.com/release-calendar",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
+    },
+    {
+      "time": "2026-09-30T18:01:09.584685+00:00",
+      "type": "SOURCE_CHANGED",
+      "source": "GameStop Power Packs search surface",
+      "url": "https://www.gamestop.com/powerpack2026opplatinums01npn",
+      "signals": [
+        "no purchase necessary",
+        "sweepstakes"
+      ]
+    },
+    {
       "time": "2026-09-29T18:07:11.430143+00:00",
       "type": "SOURCE_ERROR",
       "source": "Topps Access Rules",
