@@ -1,6 +1,20 @@
 {
   "events": [
     {
+      "time": "2026-10-02T17:53:49.944319+00:00",
+      "type": "SOURCE_ERROR",
+      "source": "Topps Access Rules",
+      "url": "https://www.topps.com/pages/npn",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
+    },
+    {
+      "time": "2026-10-02T17:53:49.944319+00:00",
+      "type": "SOURCE_ERROR",
+      "source": "Topps Release Calendar",
+      "url": "https://www.topps.com/release-calendar",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
+    },
+    {
       "time": "2026-10-01T18:27:58.954867+00:00",
       "type": "SOURCE_ERROR",
       "source": "Topps Access Rules",
