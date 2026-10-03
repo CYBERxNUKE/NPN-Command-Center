@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-10-02T17:53:49.944319+00:00",
-  "completedAt": "2026-10-02T17:53:52.820193+00:00",
+  "startedAt": "2026-10-03T16:27:30.864006+00:00",
+  "completedAt": "2026-10-03T16:27:32.680136+00:00",
   "sourceCount": 6,
   "checkedCount": 4,
   "errorCount": 2,
@@ -8,21 +8,21 @@
     {
       "name": "Topps Access Rules",
       "url": "https://www.topps.com/pages/npn",
-      "checkedAt": "2026-10-02T17:53:49.944319+00:00",
+      "checkedAt": "2026-10-03T16:27:30.864006+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
     },
     {
       "name": "Topps Release Calendar",
       "url": "https://www.topps.com/release-calendar",
-      "checkedAt": "2026-10-02T17:53:49.944319+00:00",
+      "checkedAt": "2026-10-03T16:27:30.864006+00:00",
       "status": "ERROR",
       "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
     },
     {
       "name": "Upper Deck NPN",
       "url": "https://upperdeck.com/sweepstakes/",
-      "checkedAt": "2026-10-02T17:53:49.944319+00:00",
+      "checkedAt": "2026-10-03T16:27:30.864006+00:00",
       "status": 200,
       "signals": [
         "no purchase necessary",
@@ -33,7 +33,7 @@
     {
       "name": "GameStop Power Packs search surface",
       "url": "https://www.gamestop.com/powerpack2026opplatinums01npn",
-      "checkedAt": "2026-10-02T17:53:49.944319+00:00",
+      "checkedAt": "2026-10-03T16:27:30.864006+00:00",
       "status": 200,
       "signals": [
         "no purchase necessary",
@@ -44,7 +44,7 @@
     {
       "name": "Panini FAQ / support",
       "url": "https://www.paniniamerica.net/customer-support-faq",
-      "checkedAt": "2026-10-02T17:53:49.944319+00:00",
+      "checkedAt": "2026-10-03T16:27:30.864006+00:00",
       "status": 200,
       "signals": [],
       "changed": false
@@ -52,7 +52,7 @@
     {
       "name": "NPN Offers aggregator",
       "url": "https://npnoffers.com/",
-      "checkedAt": "2026-10-02T17:53:49.944319+00:00",
+      "checkedAt": "2026-10-03T16:27:30.864006+00:00",
       "status": 200,
       "signals": [
         "no purchase necessary"
