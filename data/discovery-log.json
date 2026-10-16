@@ -1,6 +1,30 @@
 {
   "events": [
     {
+      "time": "2026-10-16T16:44:29.848883+00:00",
+      "type": "SOURCE_ERROR",
+      "source": "Topps Access Rules",
+      "url": "https://www.topps.com/pages/npn",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
+    },
+    {
+      "time": "2026-10-16T16:44:29.848883+00:00",
+      "type": "SOURCE_ERROR",
+      "source": "Topps Release Calendar",
+      "url": "https://www.topps.com/release-calendar",
+      "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
+    },
+    {
+      "time": "2026-10-16T16:44:29.848883+00:00",
+      "type": "SOURCE_CHANGED",
+      "source": "Upper Deck NPN",
+      "url": "https://upperdeck.com/sweepstakes/",
+      "signals": [
+        "no purchase necessary",
+        "sweepstakes"
+      ]
+    },
+    {
       "time": "2026-10-15T17:06:58.332280+00:00",
       "type": "SOURCE_ERROR",
       "source": "Topps Access Rules",
