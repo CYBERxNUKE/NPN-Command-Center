@@ -2,21 +2,21 @@
   "https://www.topps.com/pages/npn": {
     "name": "Topps Access Rules",
     "url": "https://www.topps.com/pages/npn",
-    "checkedAt": "2026-10-21T17:18:37.639110+00:00",
+    "checkedAt": "2026-10-22T17:16:25.263815+00:00",
     "status": "ERROR",
     "error": "403 Client Error: Forbidden for url: https://www.topps.com/pages/npn"
   },
   "https://www.topps.com/release-calendar": {
     "name": "Topps Release Calendar",
     "url": "https://www.topps.com/release-calendar",
-    "checkedAt": "2026-10-21T17:18:37.639110+00:00",
+    "checkedAt": "2026-10-22T17:16:25.263815+00:00",
     "status": "ERROR",
     "error": "403 Client Error: Forbidden for url: https://www.topps.com/release-calendar"
   },
   "https://upperdeck.com/sweepstakes/": {
     "name": "Upper Deck NPN",
     "url": "https://upperdeck.com/sweepstakes/",
-    "checkedAt": "2026-10-21T17:18:37.639110+00:00",
+    "checkedAt": "2026-10-22T17:16:25.263815+00:00",
     "status": 200,
     "signals": [
       "no purchase necessary",
@@ -28,19 +28,19 @@
   "https://www.gamestop.com/powerpack2026opplatinums01npn": {
     "name": "GameStop Power Packs search surface",
     "url": "https://www.gamestop.com/powerpack2026opplatinums01npn",
-    "checkedAt": "2026-10-21T17:18:37.639110+00:00",
+    "checkedAt": "2026-10-22T17:16:25.263815+00:00",
     "status": 200,
     "signals": [
       "no purchase necessary",
       "sweepstakes"
     ],
-    "changed": false,
-    "sha256": "0378ae67cba8112511fc5b5795a6b2828731707afc4df86b6cdf1e7bd9c1f154"
+    "changed": true,
+    "sha256": "03c46172e5f951a832922c3b2901ba2ef71227a6f5a0932533e906af9458e868"
   },
   "https://www.paniniamerica.net/customer-support-faq": {
     "name": "Panini FAQ / support",
     "url": "https://www.paniniamerica.net/customer-support-faq",
-    "checkedAt": "2026-10-21T17:18:37.639110+00:00",
+    "checkedAt": "2026-10-22T17:16:25.263815+00:00",
     "status": 200,
     "signals": [],
     "changed": false,
@@ -49,7 +49,7 @@
   "https://npnoffers.com/": {
     "name": "NPN Offers aggregator",
     "url": "https://npnoffers.com/",
-    "checkedAt": "2026-10-21T17:18:37.639110+00:00",
+    "checkedAt": "2026-10-22T17:16:25.263815+00:00",
     "status": 200,
     "signals": [
       "no purchase necessary"
